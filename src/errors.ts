@@ -7,6 +7,7 @@ export type ErrorCode =
   | "API_RESPONSE_INVALID"
   | "INSTALL_ERROR"
   | "UPDATE_ERROR"
+  | "HISTORY_ERROR"
   | "CANCELLED";
 
 export class TransxError extends Error {

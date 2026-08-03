@@ -4,6 +4,8 @@ import { stderr, stdout } from "node:process";
 
 import { ConfigStore } from "./config.js";
 import { TransxError, toTransxError } from "./errors.js";
+import { runHistoryCommand } from "./history-command.js";
+import { HistoryStore } from "./history.js";
 import { promptSecret, promptText, readStdin } from "./input.js";
 import { getLatestVersion, installCurrentPackage, updateFromRegistry } from "./installer.js";
 import { getLanguagesJson, getLanguagesText } from "./languages.js";
@@ -29,6 +31,11 @@ Commands:
   init                         初始化 URL 和 API Key
   translate <text>             翻译文本；未传 text 时读取 stdin
   languages [--json]           查看支持的源语言和目标语言
+  history [options]            查看翻译历史
+  history search <keyword>     搜索原文和译文
+  history status               查看历史文件状态
+  history clear <options>      按条数或时间清理历史
+  history help                 显示历史命令帮助
   config                       查看 URL 模板和完整 API Key
   config set-url [url]         设置包含 {key} 的 URL 模板
   config set-key [--stdin]     隐藏输入或从 stdin 设置 API Key
@@ -51,6 +58,10 @@ Examples:
   transx translate "Hello world" --to ZH --json
   echo "Hello world" | transx translate --to ZH --json
   transx languages --json
+  transx history --limit 20
+  transx history --from "2026-08-01" --to "2026-08-03"
+  transx history search "环境审查" --json
+  transx history clear --older-than 30d --yes
 `;
 
 interface TranslateArguments {
@@ -167,6 +178,19 @@ async function runTranslate(store: ConfigStore, args: string[]): Promise<void> {
     ...(parsed.format ? { format: parsed.format } : {}),
     ...(parsed.timeoutMs ? { timeoutMs: parsed.timeoutMs } : {}),
   });
+  try {
+    const warning = await new HistoryStore(store.directory).append({
+      sourceLang: result.sourceLang,
+      targetLang: result.targetLang,
+      format: parsed.format ?? "plain",
+      input: text,
+      output: result.data,
+    });
+    if (warning) stderr.write(`历史提醒：${warning}\n`);
+  } catch (error) {
+    const historyError = toTransxError(error);
+    stderr.write(`历史记录写入失败：${historyError.message}\n`);
+  }
   if (parsed.json) {
     stdout.write(
       `${JSON.stringify({
@@ -287,6 +311,9 @@ async function main(): Promise<void> {
         throw new TransxError("INVALID_ARGUMENT", "languages 仅支持 --json", 2);
       }
       stdout.write(`${commandArgs.includes("--json") ? getLanguagesJson() : getLanguagesText()}\n`);
+      return;
+    case "history":
+      await runHistoryCommand(store.directory, commandArgs);
       return;
     case "install": {
       const directory = await installCurrentPackage(commandArgs.includes("--force"));

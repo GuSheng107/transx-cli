@@ -7,8 +7,8 @@
     <meta name="description" content="TransX CLI 工具文档：逐条说明每个指令的语法、专属参数、示例与返回格式。" />
     <title>工具文档 — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260803-5" />
-    <script src="./app.js?v=20260803-5" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260803-6" />
+    <script src="./app.js?v=20260803-6" defer></script>
   </head>
   <body class="docs-page">
     <header class="topbar">
@@ -33,13 +33,14 @@
         <a href="#cmd-init"><span>03</span><span class="nav-label"><strong>init</strong><small>初始化连接配置</small></span></a>
         <a href="#cmd-translate"><span>04</span><span class="nav-label"><strong>translate</strong><small>翻译文本</small></span></a>
         <a href="#cmd-languages"><span>05</span><span class="nav-label"><strong>languages</strong><small>查看支持的语言</small></span></a>
-        <a href="#cmd-config"><span>06</span><span class="nav-label"><strong>config</strong><small>查看和管理配置</small></span></a>
+        <a href="#cmd-history"><span>06</span><span class="nav-label"><strong>history</strong><small>查看、搜索和清理历史</small></span></a>
+        <a href="#cmd-config"><span>07</span><span class="nav-label"><strong>config</strong><small>查看和管理配置</small></span></a>
         <p class="docs-nav-group">安装与维护</p>
-        <a href="#cmd-install"><span>07</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
-        <a href="#cmd-version"><span>08</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
-        <a href="#cmd-update"><span>09</span><span class="nav-label"><strong>update</strong><small>更新到最新版</small></span></a>
+        <a href="#cmd-install"><span>08</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
+        <a href="#cmd-version"><span>09</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
+        <a href="#cmd-update"><span>10</span><span class="nav-label"><strong>update</strong><small>更新到最新版</small></span></a>
         <p class="docs-nav-group">AI 调用</p>
-        <a href="#cmd-output"><span>10</span><span class="nav-label"><strong>JSON 与错误码</strong><small>稳定输出契约</small></span></a>
+        <a href="#cmd-output"><span>11</span><span class="nav-label"><strong>JSON 与错误码</strong><small>稳定输出契约</small></span></a>
       </aside>
 
       <div class="docs-content">
@@ -132,8 +133,58 @@
           <div class="cmd-block"><code id="example-languages">transx languages --json</code><button type="button" class="copy-btn" data-copy="example-languages" aria-label="复制 languages 示例">复制</button></div>
         </article>
 
-        <article class="doc-section command-doc" id="cmd-config">
+        <article class="doc-section command-doc" id="cmd-history">
           <div class="doc-index">06</div>
+          <span class="kicker">COMMAND GROUP</span>
+          <h2><code>transx history</code></h2>
+          <p class="doc-lead">查看、搜索或清理本地翻译历史。成功翻译自动记录原文和译文，不记录 URL 或 API Key。</p>
+          <div class="cmd-block command-syntax"><code id="code-history">transx history [list|search|status|clear|help]</code><button type="button" class="copy-btn" data-copy="code-history" aria-label="复制 history 命令">复制</button></div>
+
+          <h3 class="sub-h"><code>transx history [list]</code></h3>
+          <p class="doc-note">按时间倒序查看记录。省略 <code>list</code> 时行为相同，默认显示 20 条。</p>
+          <div class="opt-table compact-table">
+            <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
+            <div class="opt-row"><code>--limit &lt;n&gt;</code><span>本次返回条数，默认 20</span></div>
+            <div class="opt-row"><code>--offset &lt;n&gt;</code><span>跳过前 n 条，默认 0</span></div>
+            <div class="opt-row"><code>--from &lt;time&gt;</code><span>仅返回此时间及之后的记录</span></div>
+            <div class="opt-row"><code>--to &lt;time&gt;</code><span>仅返回此时间及之前的记录</span></div>
+            <div class="opt-row"><code>--since &lt;Nd&gt;</code><span>查看最近 N 天，例如 <code>7d</code>；不能与 <code>--from</code> 同用</span></div>
+            <div class="opt-row"><code>--json</code><span>输出适合程序读取的单行 JSON</span></div>
+          </div>
+          <div class="cmd-block"><code id="example-history-list">transx history --limit 50 --offset 100 --json</code><button type="button" class="copy-btn" data-copy="example-history-list" aria-label="复制历史查看示例">复制</button></div>
+
+          <h3 class="sub-h"><code>transx history search &lt;keyword&gt;</code></h3>
+          <p class="doc-note">不区分英文大小写，同时搜索原文和译文；任一包含关键词就返回，可匹配多条。支持与查看命令相同的 <code>--limit</code>、<code>--offset</code>、时间范围和 <code>--json</code> 参数。</p>
+          <div class="cmd-block"><code id="example-history-search">transx history search "环境审查" --limit 50 --json</code><button type="button" class="copy-btn" data-copy="example-history-search" aria-label="复制历史搜索示例">复制</button></div>
+
+          <h3 class="sub-h"><code>transx history status [--json]</code></h3>
+          <p class="doc-note">显示历史目录、记录数量、文件总量、最早和最新记录，以及是否需要清理。</p>
+
+          <h3 class="sub-h"><code>transx history clear &lt;mode&gt;</code></h3>
+          <div class="opt-table compact-table">
+            <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
+            <div class="opt-row"><code>--oldest &lt;n&gt;</code><span>删除最旧的 n 条</span></div>
+            <div class="opt-row"><code>--keep &lt;n&gt;</code><span>只保留最新的 n 条</span></div>
+            <div class="opt-row"><code>--before &lt;time&gt;</code><span>删除指定时间之前的记录</span></div>
+            <div class="opt-row"><code>--older-than &lt;Nd&gt;</code><span>删除早于最近 N 天的记录，例如 <code>30d</code></span></div>
+            <div class="opt-row"><code>--from &lt;time&gt; --to &lt;time&gt;</code><span>删除指定时间范围内的记录，两项必须同时提供</span></div>
+            <div class="opt-row"><code>--all</code><span>删除全部记录</span></div>
+            <div class="opt-row"><code>--yes</code><span>跳过确认；非交互环境必须提供</span></div>
+            <div class="opt-row"><code>--json</code><span>以 JSON 返回删除条数</span></div>
+          </div>
+          <div class="cmd-block"><code id="example-history-clear">transx history clear --older-than 30d --yes</code><button type="button" class="copy-btn" data-copy="example-history-clear" aria-label="复制历史清理示例">复制</button></div>
+
+          <h3 class="sub-h">存储与时间</h3>
+          <div class="language-summary">
+            <div><strong>目录</strong><span><code>~/.transx/history/</code></span></div>
+            <div><strong>文件</strong><span><code>index.json</code> 与 <code>YYYY-MM-DD.json</code></span></div>
+            <div><strong>提醒</strong><span>超过 30 天或 100 MB，每天最多一次</span></div>
+          </div>
+          <p class="doc-note">记录不限制条数，也不会自动删除。时间统一按中国时间处理，格式为 <code>YYYY-MM-DD HH:mm:ss.SSS</code>，不附带时区标记。运行 <code>transx history help</code> 可在终端查看此命令组帮助。</p>
+        </article>
+
+        <article class="doc-section command-doc" id="cmd-config">
+          <div class="doc-index">07</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx config</code></h2>
           <p class="doc-lead">查看完整 URL 模板和原 API Key，或分别维护本地配置。</p>
@@ -167,7 +218,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-install">
-          <div class="doc-index">07</div>
+          <div class="doc-index">08</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx install</code></h2>
           <p class="doc-lead">把当前包安装到用户目录并配置 PATH，支持 Windows、macOS 与 Linux。</p>
@@ -183,7 +234,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-version">
-          <div class="doc-index">08</div>
+          <div class="doc-index">09</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx version</code></h2>
           <p class="doc-lead">显示当前版本；需要联网检查 npm Registry 时再添加 <code>--check</code>。</p>
@@ -196,7 +247,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-update">
-          <div class="doc-index">09</div>
+          <div class="doc-index">10</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx update</code></h2>
           <p class="doc-lead">从 npm Registry 获取最新版并更新用户目录中的 TransX CLI。</p>
@@ -205,7 +256,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-output">
-          <div class="doc-index">10</div>
+          <div class="doc-index">11</div>
           <span class="kicker">AI CONTRACT</span>
           <h2>JSON 与错误码</h2>
           <p class="doc-lead">仅 <code>translate --json</code> 使用以下稳定契约：成功写入 stdout，失败写入 stderr，并返回非零退出码。</p>
@@ -240,6 +291,7 @@
             <div class="opt-row"><code>NETWORK_ERROR</code><span>网络或超时</span><span class="dim">4</span></div>
             <div class="opt-row"><code>API_HTTP_ERROR</code><span>DeepLX 返回错误</span><span class="dim">5</span></div>
             <div class="opt-row"><code>API_RESPONSE_INVALID</code><span>响应格式无效</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>HISTORY_ERROR</code><span>历史文件读取、写入或锁定失败</span><span class="dim">7</span></div>
             <div class="opt-row"><code>INSTALL_ERROR</code><span>安装失败</span><span class="dim">5</span></div>
             <div class="opt-row"><code>UPDATE_ERROR</code><span>更新失败</span><span class="dim">5</span></div>
             <div class="opt-row"><code>CANCELLED</code><span>用户取消</span><span class="dim">130</span></div>

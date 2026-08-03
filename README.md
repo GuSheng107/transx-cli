@@ -90,6 +90,40 @@ transx languages --json
 
 当前内置清单与 DeepLX v1.2.2 同步，包含 37 个目标语言代码；`EN` 和 `PT` 是兼容别名，源语言还支持 `AUTO`。此命令无需初始化或联网。
 
+每次成功翻译都会写入本地历史，不记录 URL 或 API Key。历史按中国日期拆分为标准 JSON 文件，时间格式为 `YYYY-MM-DD HH:mm:ss.SSS`，不附带时区标记。
+
+## 翻译历史
+
+查看最近 20 条，或按条数和时间分页：
+
+```bash
+transx history
+transx history --limit 50 --offset 100
+transx history --from "2026-08-01" --to "2026-08-03"
+transx history --since 7d --json
+```
+
+搜索会同时匹配原文和译文，只要包含关键词就返回，可返回多条：
+
+```bash
+transx history search "环境审查"
+transx history search "review" --limit 50 --json
+```
+
+查看文件状态或清理记录：
+
+```bash
+transx history status
+transx history clear --oldest 100
+transx history clear --keep 1000
+transx history clear --before "2026-07-01"
+transx history clear --older-than 30d --yes
+transx history clear --from "2026-07-01" --to "2026-07-31" --yes
+transx history clear --all --yes
+```
+
+历史目录为 `~/.transx/history/`，包含 `index.json` 和按日期拆分的 `YYYY-MM-DD.json`。记录不限制条数；最早记录超过 30 天或文件总量超过 100 MB 时每天最多提醒一次，不会自动删除。
+
 成功输出：
 
 ```json
