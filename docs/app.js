@@ -6,6 +6,7 @@ const toast = document.querySelector(".toast");
 const navLinks = [...document.querySelectorAll(".docs-nav a")];
 const docSections = [...document.querySelectorAll(".doc-section[id]")];
 let toastTimer;
+const copyRestoreTimers = new WeakMap();
 
 function detectPlatform() {
   const platform = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "";
@@ -23,7 +24,7 @@ function setPlatform(name) {
   platformCurrent.querySelector(".platform-label").textContent = labels[name];
   platformCurrent.dataset.platform = name;
   platformOptions.forEach((option) => option.setAttribute("aria-selected", String(option.dataset.platform === name)));
-  if (installCode) installCode.textContent = "npx transx-cli install";
+  if (installCode) installCode.textContent = "npx transx-cli@latest install";
 }
 
 if (platformCurrent && platformMenu) {
@@ -64,22 +65,41 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     try {
       await navigator.clipboard.writeText(target.textContent.trim());
       showToast("已复制");
+      if (button.closest(".cmd-block, .command-syntax")) {
+        const previousTimer = copyRestoreTimers.get(button);
+        if (previousTimer) window.clearTimeout(previousTimer);
+        button.textContent = "已复制";
+        button.classList.add("copied");
+        const restoreTimer = window.setTimeout(() => {
+          button.textContent = "复制";
+          button.classList.remove("copied");
+          copyRestoreTimers.delete(button);
+        }, 1800);
+        copyRestoreTimers.set(button, restoreTimer);
+      }
     } catch {
       showToast("复制失败，请手动选择");
     }
   });
 });
 
-if ("IntersectionObserver" in window && docSections.length > 0) {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible) return;
-      navLinks.forEach((link) => link.classList.toggle("active", link.hash === `#${visible.target.id}`));
-    },
-    { rootMargin: "-15% 0px -70%", threshold: [0, 0.25, 0.5] },
-  );
-  docSections.forEach((section) => observer.observe(section));
+if (docSections.length > 0) {
+  let scrollFrame;
+  const updateActiveSection = () => {
+    const atPageEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    const activationLine = Math.min(180, window.innerHeight * 0.28);
+    let activeSection = docSections[0];
+    for (const section of docSections) {
+      if (section.getBoundingClientRect().top <= activationLine) activeSection = section;
+    }
+    if (atPageEnd) activeSection = docSections[docSections.length - 1];
+    navLinks.forEach((link) => link.classList.toggle("active", link.hash === `#${activeSection.id}`));
+  };
+  const scheduleActiveSectionUpdate = () => {
+    window.cancelAnimationFrame(scrollFrame);
+    scrollFrame = window.requestAnimationFrame(updateActiveSection);
+  };
+  window.addEventListener("scroll", scheduleActiveSectionUpdate, { passive: true });
+  window.addEventListener("resize", scheduleActiveSectionUpdate);
+  updateActiveSection();
 }

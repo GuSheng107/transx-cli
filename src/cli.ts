@@ -6,11 +6,18 @@ import { ConfigStore } from "./config.js";
 import { TransxError, toTransxError } from "./errors.js";
 import { promptSecret, promptText, readStdin } from "./input.js";
 import { getLatestVersion, installCurrentPackage, updateFromRegistry } from "./installer.js";
+import { getLanguagesJson, getLanguagesText } from "./languages.js";
 import { getPackageInfo } from "./package-info.js";
 import { translate, type ContentFormat } from "./translator.js";
+import {
+  buildInteractiveFrame,
+  clearScreen,
+  getInteractiveMenuItems,
+  selectInteractiveMenu,
+  type InteractiveAction,
+} from "./ui.js";
 
-const DISCLAIMER =
-  "TransX CLI — DeepLX 特供版（非官方，仅连接用户自行提供的 DeepLX-compatible URL 和 API Key）";
+const DISCLAIMER = "TransX CLI — DeepLX 特供版";
 
 const HELP = `${DISCLAIMER}
 
@@ -18,8 +25,10 @@ Usage:
   transx [command]
 
 Commands:
+  transx                       打开交互界面
   init                         初始化 URL 和 API Key
   translate <text>             翻译文本；未传 text 时读取 stdin
+  languages [--json]           查看支持的源语言和目标语言
   config                       查看脱敏配置和配置路径
   config set-url [url]         设置包含 {key} 的 URL 模板
   config set-key [--stdin]     隐藏输入或从 stdin 设置 API Key
@@ -41,6 +50,7 @@ Examples:
   transx init
   transx translate "Hello world" --to ZH --json
   echo "Hello world" | transx translate --to ZH --json
+  transx languages --json
 `;
 
 interface TranslateArguments {
@@ -172,9 +182,88 @@ async function runTranslate(store: ConfigStore, args: string[]): Promise<void> {
   }
 }
 
+async function pauseInteractive(): Promise<void> {
+  await promptText("\n按 Enter 返回主菜单…");
+}
+
+function renderInteractivePage(
+  version: string,
+  initialized: boolean,
+  items: ReturnType<typeof getInteractiveMenuItems>,
+  content: string,
+): void {
+  clearScreen();
+  stdout.write(
+    `${buildInteractiveFrame({
+      version,
+      initialized,
+      items,
+      selectedIndex: -1,
+      color: !process.env.NO_COLOR,
+    }).split("\n").slice(0, 10).join("\n")}\n\n${content}\n`,
+  );
+}
+
+async function runInteractive(store: ConfigStore): Promise<void> {
+  const packageInfo = await getPackageInfo();
+  while (true) {
+    const status = await store.status();
+    const items = getInteractiveMenuItems(status.initialized);
+    const action = await selectInteractiveMenu({
+      version: packageInfo.version,
+      initialized: status.initialized,
+      items,
+    });
+    if (!action || action === "exit") {
+      clearScreen();
+      stdout.write("TransX 已退出。\n");
+      return;
+    }
+
+    clearScreen();
+    try {
+      if (action === "translate") {
+        renderInteractivePage(packageInfo.version, status.initialized, items, "翻译文本");
+        const text = await promptText("待翻译文本：");
+        const target = (await promptText("目标语言 [ZH]：")) || "ZH";
+        await runTranslate(store, [text, "--to", target]);
+      } else if (action === "init") {
+        renderInteractivePage(packageInfo.version, status.initialized, items, "初始化 / 修改配置");
+        await runInit(store, []);
+      } else if (action === "config") {
+        renderInteractivePage(packageInfo.version, status.initialized, items, "当前脱敏配置");
+        await runConfig(store, []);
+      } else if (action === "update") {
+        renderInteractivePage(packageInfo.version, status.initialized, items, "检查版本更新");
+        const latest = await getLatestVersion();
+        stdout.write(
+          latest === packageInfo.version
+            ? `已是最新版本（v${packageInfo.version}）\n`
+            : `发现新版本 ${latest}，运行 transx update 更新\n`,
+        );
+      } else if (action === "help") {
+        clearScreen();
+        stdout.write(HELP);
+      }
+    } catch (error) {
+      const transxError = toTransxError(error);
+      stderr.write(`\n错误 [${transxError.code}]：${transxError.message}\n`);
+    }
+    await pauseInteractive();
+  }
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const command = args[0] || "help";
+  const command = args[0];
+  if (!command) {
+    if (process.stdin.isTTY && process.stdout.isTTY) {
+      await runInteractive(new ConfigStore());
+    } else {
+      stdout.write(HELP);
+    }
+    return;
+  }
   const commandArgs = args.slice(1);
   const store = new ConfigStore();
 
@@ -192,6 +281,12 @@ async function main(): Promise<void> {
       return;
     case "translate":
       await runTranslate(store, commandArgs);
+      return;
+    case "languages":
+      if (commandArgs.some((arg) => arg !== "--json")) {
+        throw new TransxError("INVALID_ARGUMENT", "languages 仅支持 --json", 2);
+      }
+      stdout.write(`${commandArgs.includes("--json") ? getLanguagesJson() : getLanguagesText()}\n`);
       return;
     case "install": {
       const directory = await installCurrentPackage(commandArgs.includes("--force"));

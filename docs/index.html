@@ -11,8 +11,8 @@
     <meta property="og:url" content="https://gusheng107.github.io/transx-cli/" />
     <title>TransX CLI — DeepLX 特供翻译命令</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="./app.js" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260803-4" />
+    <script src="./app.js?v=20260803-4" defer></script>
   </head>
   <body class="home-page">
     <header class="topbar">
@@ -43,18 +43,28 @@
             <div class="laptop-screen">
               <div class="term-bar">
                 <div class="term-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-                <span>TransX CLI v0.1.0</span>
+                <span>TransX CLI v1.0.0</span>
               </div>
               <div class="term-body">
-                <p class="term-title">欢迎来到 TransX CLI！</p>
-                <ol class="term-tutorial">
-                  <li>查看帮助：运行 <code>transx help</code> 获取完整指令。</li>
-                  <li>初始化配置：运行 <code>transx init</code>，输入 DeepLX URL 模板与 API Key。</li>
-                  <li>翻译文本：<code>transx translate "Hello" --to ZH --json</code></li>
-                  <li>查看配置：<code>transx config</code></li>
-                  <li>检查更新：<code>transx version --check</code>，升级：<code>transx update</code></li>
-                </ol>
-                <p class="term-prompt"><span class="cursor">_</span></p>
+                <pre class="term-session" aria-label="TransX CLI 未配置状态预览"><span class="term-logo">████████╗██████╗  █████╗ ███╗   ██╗███████╗██╗  ██╗
+╚══██╔══╝██╔══██╗██╔══██╗████╗  ██║██╔════╝╚██╗██╔╝
+   ██║   ██████╔╝███████║██╔██╗ ██║███████╗ ╚███╔╝
+   ██║   ██╔══██╗██╔══██║██║╚██╗██║╚════██║ ██╔██╗
+   ██║   ██║  ██║██║  ██║██║ ╚████║███████║██╔╝ ██╗
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝</span>
+<span class="term-bright">TransX CLI v1.0.0</span>  <span class="term-muted">未配置 · 请先初始化</span>
+
+<span class="term-border">┌──────────────────────────────┐
+│</span>  欢迎使用 TransX CLI         <span class="term-border">│
+└──────────────────────────────┘</span>
+<span class="term-muted">DeepLX 特供版</span>
+
+<span class="term-accent">❯</span> 1. 初始化          <span class="term-muted">设置 DeepLX URL 与 API Key</span>
+  2. 检查版本更新    <span class="term-muted">比较 npm Registry 最新版本</span>
+  3. 查看帮助        <span class="term-muted">显示所有命令与参数</span>
+  4. 退出            <span class="term-muted">结束 TransX CLI</span>
+
+<span class="term-muted">↑↓ 选择 · Enter 确认 · Esc 退出 · 数字键直达</span></pre>
               </div>
             </div>
           </div>
@@ -75,7 +85,7 @@
             </div>
           </div>
           <div class="install-command">
-            <code id="install-code">npx transx-cli install</code>
+            <code id="install-code">npx transx-cli@latest install</code>
             <button type="button" class="copy-btn" data-copy="install-code" aria-label="复制安装命令">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
@@ -87,7 +97,7 @@
 
     <footer class="site-footer">
       <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
-      <p>DeepLX 特供版 · 非官方 · 用户自带 URL 与 Key</p>
+      <p>DeepLX 特供版</p>
     </footer>
     <div class="toast" role="status" aria-live="polite">已复制</div>
   </body>

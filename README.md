@@ -19,7 +19,7 @@ TransX 是一个面向脚本和 AI Agent 的文本翻译命令行工具。它只
 推荐通过 npm Registry 安装到用户目录：
 
 ```bash
-npx transx-cli install
+npx transx-cli@latest install
 ```
 
 安装布局参考 Luckin CLI：
@@ -31,7 +31,7 @@ macOS/Linux：        ~/.transx/bin/
 配置目录：           ~/.transx/
 ```
 
-安装会将用户级 `bin` 目录加入 PATH。重新打开终端后运行：
+安装会将用户级 `bin` 目录加入 PATH。重新打开终端后运行 `transx` 进入交互界面，或查看完整帮助：
 
 ```bash
 transx help
@@ -80,6 +80,15 @@ HTML/XML：
 ```bash
 transx translate '<p>Hello</p>' --to ZH --format html --json
 ```
+
+查看支持的语言代码：
+
+```bash
+transx languages
+transx languages --json
+```
+
+当前内置清单与 DeepLX v1.2.2 同步，包含 37 个目标语言代码；`EN` 和 `PT` 是兼容别名，源语言还支持 `AUTO`。此命令无需初始化或联网。
 
 成功输出：
 
