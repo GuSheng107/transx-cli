@@ -8,7 +8,7 @@
 
 ## 写在最前
 
-**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 由用户自己去linux.do的connect获取，本项目不附带密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
+**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 需要用户自己去 linux.do 的 connect 频道获取，本项目不附带密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
 
 ## 平台
 
