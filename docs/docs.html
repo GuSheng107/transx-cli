@@ -7,8 +7,8 @@
     <meta name="description" content="TransX CLI 工具文档：逐条说明每个指令的语法、专属参数、示例与返回格式。" />
     <title>工具文档 — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260803-6" />
-    <script src="./app.js?v=20260803-6" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260803-7" />
+    <script src="./app.js?v=20260803-7" defer></script>
   </head>
   <body class="docs-page">
     <header class="topbar">
@@ -75,17 +75,16 @@
           <div class="doc-index">03</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx init</code></h2>
-          <p class="doc-lead">首次初始化或同时替换 DeepLX URL 模板与 API Key。URL 必须包含 <code>{key}</code> 占位符。</p>
-          <div class="cmd-block command-syntax"><code id="code-init">transx init [--url &lt;url&gt;] [--key-stdin]</code><button type="button" class="copy-btn" data-copy="code-init" aria-label="复制 init 命令">复制</button></div>
+          <p class="doc-lead">首次初始化或替换 API Key。URL 已内置指向 <code>api.deeplx.org</code>，无需手动配置。</p>
+          <div class="cmd-block command-syntax"><code id="code-init">transx init [--key-stdin]</code><button type="button" class="copy-btn" data-copy="code-init" aria-label="复制 init 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table compact-table">
             <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
-            <div class="opt-row"><code>--url &lt;url&gt;</code><span>直接传入包含 <code>{key}</code> 的 URL 模板；省略时交互输入</span></div>
             <div class="opt-row"><code>--key-stdin</code><span>从 stdin 读取 API Key；省略时隐藏输入</span></div>
           </div>
           <h3 class="sub-h">示例</h3>
           <div class="cmd-block"><code id="example-init">transx init</code><button type="button" class="copy-btn" data-copy="example-init" aria-label="复制 init 示例">复制</button></div>
-          <p class="doc-note">自动化示例：<code>printf '%s' "$DEEPLX_API_KEY" | transx init --url 'https://your-deeplx.example/{key}/translate' --key-stdin</code></p>
+          <p class="doc-note">自动化示例：<code>printf '%s' "$DEEPLX_API_KEY" | transx init --key-stdin</code></p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-translate">
@@ -123,12 +122,11 @@
           </div>
           <h3 class="sub-h">语言范围</h3>
           <div class="language-summary">
-            <div><strong>目标语言</strong><span>37 个代码</span></div>
-            <div><strong>兼容别名</strong><span><code>EN → EN-US</code>，<code>PT → PT-BR</code></span></div>
-            <div><strong>源语言</strong><span><code>AUTO</code>，以及全部目标代码和别名</span></div>
+            <div><strong>目标语言</strong><span>32 个代码</span></div>
+            <div><strong>源语言</strong><span><code>AUTO</code>，以及全部目标代码</span></div>
           </div>
-          <div class="language-codes"><code>AR BG CS DA DE EL EN-GB EN-US ES ES-419 ET FI FR HE HU ID IT JA KO LT LV NB NL PL PT-BR PT-PT RO RU SK SL SV TR UK VI ZH ZH-HANS ZH-HANT</code></div>
-          <p class="doc-note">此列表与 DeepLX v1.2.2 源码同步。不同版本或兼容服务的实际范围可能不同。</p>
+          <div class="language-codes"><code>AR BG CS DA DE EL EN ES ET FI FR HU ID IT JA KO LT LV NB NL PL PT RO RU SK SL SV TR UK ZH ZH-HANS ZH-HANT</code></div>
+          <p class="doc-note">经实测 <code>api.deeplx.org</code> 筛选；<code>EN</code> / <code>PT</code> 为直接可用代码，<code>EN-GB</code>、<code>EN-US</code>、<code>ES-419</code>、<code>HE</code>、<code>PT-BR</code>、<code>PT-PT</code>、<code>VI</code> 不可用。</p>
           <h3 class="sub-h">AI 示例</h3>
           <div class="cmd-block"><code id="example-languages">transx languages --json</code><button type="button" class="copy-btn" data-copy="example-languages" aria-label="复制 languages 示例">复制</button></div>
         </article>
@@ -187,17 +185,11 @@
           <div class="doc-index">07</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx config</code></h2>
-          <p class="doc-lead">查看完整 URL 模板和原 API Key，或分别维护本地配置。</p>
-          <div class="cmd-block command-syntax"><code id="code-config">transx config [set-url|set-key|reset]</code><button type="button" class="copy-btn" data-copy="code-config" aria-label="复制 config 命令">复制</button></div>
+          <p class="doc-lead">查看 URL 模板和完整 API Key，或维护本地配置。</p>
+          <div class="cmd-block command-syntax"><code id="code-config">transx config [set-key|reset]</code><button type="button" class="copy-btn" data-copy="code-config" aria-label="复制 config 命令">复制</button></div>
 
           <h3 class="sub-h"><code>transx config</code></h3>
           <div class="no-options"><strong>参数</strong><span>无。输出 URL 模板、完整 API Key、初始化状态和配置文件路径。</span></div>
-
-          <h3 class="sub-h"><code>transx config set-url [url]</code></h3>
-          <div class="opt-table compact-table">
-            <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
-            <div class="opt-row"><code>[url]</code><span>新的 URL 模板，必须包含 <code>{key}</code>；省略时交互输入</span></div>
-          </div>
 
           <h3 class="sub-h"><code>transx config set-key [--stdin]</code></h3>
           <div class="opt-table compact-table">
@@ -208,13 +200,12 @@
           <h3 class="sub-h"><code>transx config reset &lt;target&gt;</code></h3>
           <div class="opt-table compact-table">
             <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
-            <div class="opt-row"><code>url</code><span>仅删除本地 URL 模板</span></div>
-            <div class="opt-row"><code>key</code><span>仅删除本地 API Key</span></div>
-            <div class="opt-row"><code>all</code><span>同时删除本地 URL 与 API Key</span></div>
+            <div class="opt-row"><code>key</code><span>删除本地 API Key</span></div>
+            <div class="opt-row"><code>all</code><span>重置全部配置（当前等同于删除 Key）</span></div>
           </div>
           <h3 class="sub-h">示例</h3>
-          <div class="cmd-block"><code id="example-config">transx config set-url "https://your-deeplx.example/{key}/translate"</code><button type="button" class="copy-btn" data-copy="example-config" aria-label="复制 config 示例">复制</button></div>
-          <p class="doc-note">环境变量 <code>DEEPLX_URL_TEMPLATE</code> 与 <code>DEEPLX_API_KEY</code> 会覆盖本地配置，但不会写入配置文件。</p>
+          <div class="cmd-block"><code id="example-config">transx config set-key --stdin</code><button type="button" class="copy-btn" data-copy="example-config" aria-label="复制 config 示例">复制</button></div>
+          <p class="doc-note">环境变量 <code>DEEPLX_API_KEY</code> 会覆盖本地配置，但不会写入配置文件。</p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-install">
@@ -277,7 +268,7 @@
   "ok": false,
   "error": {
     "code": "CONFIG_NOT_INITIALIZED",
-    "message": "缺少 DeepLX URL 或 API Key，请先运行 transx init"
+    "message": "缺少 DeepLX API Key，请先运行 transx init"
   }
 }</code></pre>
             </div>

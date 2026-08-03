@@ -27,7 +27,9 @@ async function ensureWindowsUserPath(binDirectory: string): Promise<void> {
     "$bin = $env:TRANSX_BIN_DIR",
     "$current = [Environment]::GetEnvironmentVariable('Path', 'User')",
     "$parts = @($current -split ';' | Where-Object { $_ })",
-    "if ($parts -notcontains $bin) {",
+    // Windows 文件系统不区分大小写，比较时统一小写，避免等价路径重复加入。
+    "$lower = $parts | ForEach-Object { $_.ToLowerInvariant() }",
+    "if ($lower -notcontains $bin.ToLowerInvariant()) {",
     "  [Environment]::SetEnvironmentVariable('Path', (($parts + $bin) -join ';'), 'User')",
     "}",
   ].join("\n");

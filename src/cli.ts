@@ -28,7 +28,7 @@ Usage:
 
 Commands:
   transx                       打开交互界面
-  init                         初始化 URL 和 API Key
+  init                         初始化 API Key（URL 已内置为 deeplx.org）
   translate <text>             翻译文本；未传 text 时读取 stdin
   languages [--json]           查看支持的源语言和目标语言
   history [options]            查看翻译历史
@@ -36,10 +36,9 @@ Commands:
   history status               查看历史文件状态
   history clear <options>      按条数或时间清理历史
   history help                 显示历史命令帮助
-  config                       查看 URL 模板和完整 API Key
-  config set-url [url]         设置包含 {key} 的 URL 模板
+  config                       查看完整配置和 API Key
   config set-key [--stdin]     隐藏输入或从 stdin 设置 API Key
-  config reset <url|key|all>   重置 URL、Key 或全部配置
+  config reset <key|all>       重置 Key 或全部配置
   install [--force]            安装到用户目录并加入 PATH
   version [--check]            显示版本，可检查 npm 最新版本
   update                       从 npm Registry 更新到最新版
@@ -117,15 +116,9 @@ function parseTranslateArguments(args: string[]): TranslateArguments {
 }
 
 async function runInit(store: ConfigStore, args: string[]): Promise<void> {
-  const urlFlagIndex = args.indexOf("--url");
-  const url = urlFlagIndex >= 0 ? args[urlFlagIndex + 1] : await promptText("DeepLX URL 模板（必须包含 {key}）：");
-  if (!url) {
-    throw new TransxError("INVALID_ARGUMENT", "URL 模板不能为空", 2);
-  }
   const apiKey = args.includes("--key-stdin")
     ? await readStdin()
     : await promptSecret("DeepLX API Key：");
-  await store.setUrlTemplate(url);
   await store.setApiKey(apiKey);
   stdout.write(`配置已保存到 ${store.directory}\n`);
 }
@@ -136,12 +129,6 @@ async function runConfig(store: ConfigStore, args: string[]): Promise<void> {
     stdout.write(`${JSON.stringify(await store.statusWithApiKey(), null, 2)}\n`);
     return;
   }
-  if (action === "set-url") {
-    const url = args[1] || (await promptText("DeepLX URL 模板（必须包含 {key}）："));
-    await store.setUrlTemplate(url);
-    stdout.write("URL 模板已保存\n");
-    return;
-  }
   if (action === "set-key") {
     const apiKey = args.includes("--stdin") ? await readStdin() : await promptSecret("DeepLX API Key：");
     await store.setApiKey(apiKey);
@@ -150,10 +137,9 @@ async function runConfig(store: ConfigStore, args: string[]): Promise<void> {
   }
   if (action === "reset") {
     const target = args[1];
-    if (target === "url") await store.resetUrl();
-    else if (target === "key") await store.resetKey();
+    if (target === "key") await store.resetKey();
     else if (target === "all") await store.resetAll();
-    else throw new TransxError("INVALID_ARGUMENT", "reset 仅支持 url、key 或 all", 2);
+    else throw new TransxError("INVALID_ARGUMENT", "reset 仅支持 key 或 all", 2);
     stdout.write(`${target} 配置已重置\n`);
     return;
   }

@@ -5,3 +5,4 @@ coverage/
 .DS_Store
 npm-debug.log*
 .tmp-e2e/
+npm_recovery_codes.txt

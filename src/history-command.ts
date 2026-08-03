@@ -204,8 +204,11 @@ export async function runHistoryCommand(configDirectory: string, args: string[])
     stdout.write(HISTORY_HELP);
     return;
   }
-  if (!action || action === "list") {
-    const parsed = parseQueryArgs(action ? args.slice(1) : args, false);
+  // 首位是选项（如 --json / --limit）时视为默认 list，而非未知子命令。
+  // 这与 README 中 "transx history --limit 20" 的文档用法保持一致。
+  if (!action || action === "list" || action.startsWith("-")) {
+    const listArgs = action === "list" ? args.slice(1) : args;
+    const parsed = parseQueryArgs(listArgs, false);
     printQueryResult(await store.query(parsed.query), parsed.json);
     return;
   }

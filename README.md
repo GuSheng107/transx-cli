@@ -1,128 +1,90 @@
 # TransX CLI — DeepLX 特供版
 
-> **非官方项目。** TransX CLI 仅连接用户自行提供的 DeepLX-compatible URL 和 API Key，不附带公共接口、密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。
+一个把 DeepLX 翻译塞进命令行的工具，写给脚本和 AI Agent 用。只翻译文本，不读文件、不起服务、不带 MCP。
 
-TransX 是一个面向脚本和 AI Agent 的文本翻译命令行工具。它只处理文本，不读取文件、不启动服务器，也不包含 MCP。
+> 感谢 [LINUX DO](https://linux.do/) 社区的佬友们，最早的反馈和 Star 都来自那里。如果你也是社区成员，欢迎来帖子里聊聊。
 
-文档站：[gusheng107.github.io/transx-cli](https://gusheng107.github.io/transx-cli/)
+文档站：https://gusheng107.github.io/transx-cli/
 
-支持平台：
+## 先说清楚
 
-- Windows 10/11（PowerShell、CMD、Windows Terminal）
-- macOS（Apple Silicon 与 Intel，zsh/bash）
-- Linux（x64/arm64，bash/zsh）
+**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 由用户自己申请并保存，本项目不附带任何公共接口、密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
+
+## 平台
+
+- Windows 10/11（PowerShell / CMD / Windows Terminal）
+- macOS（Apple Silicon 与 Intel，zsh / bash）
+- Linux（x64 / arm64，bash / zsh）
+
+需要 Node.js > 22。
 
 ## 安装
-
-要求 **Node.js > 22**。
-
-推荐通过 npm Registry 安装到用户目录：
 
 ```bash
 npx transx-cli@latest install
 ```
 
-安装布局参考 Luckin CLI：
+这会把 `transx` 装到用户目录，并把启动入口加进 PATH：
 
 ```text
-Windows 可执行入口：%LOCALAPPDATA%\.transx\bin\transx.cmd
-Windows 版本目录：  %LOCALAPPDATA%\.transx\bin\<version>\
-macOS/Linux：        ~/.transx/bin/
-配置目录：           ~/.transx/
+Windows：    %LOCALAPPDATA%\.transx\bin\transx.cmd
+macOS/Linux：~/.transx/bin/transx
+配置目录：    ~/.transx/
 ```
 
-安装会将用户级 `bin` 目录加入 PATH。重新打开终端后运行 `transx` 进入交互界面，或查看完整帮助：
+重新打开终端后，直接运行 `transx` 进入交互界面，或查看完整帮助：
 
 ```bash
 transx help
 ```
 
-## 初始化
+## 配置 API Key
+
+URL 已经内置指向 `api.deeplx.org`，你只需要提供自己的 API Key：
 
 ```bash
 transx init
 ```
 
-URL 必须由用户提供，并包含 `{key}` 占位符，例如：
+Key 是隐藏输入的，保存在 `~/.transx/credentials.json`，源码、npm 包和日志里都不会出现你的 Key。
 
-```text
-https://your-deeplx.example/{key}/translate
-```
-
-API Key 单独隐藏输入。源码、npm 包和日志都不会包含用户的 URL 或 Key。
-
-非交互环境可以使用：
+非交互环境（比如 CI）可以从 stdin 传：
 
 ```bash
-printf '%s' "$DEEPLX_API_KEY" | transx init \
-  --url 'https://your-deeplx.example/{key}/translate' \
-  --key-stdin
+printf '%s' "$DEEPLX_API_KEY" | transx init --key-stdin
 ```
 
-也可用 `DEEPLX_URL_TEMPLATE` 和 `DEEPLX_API_KEY` 临时覆盖本地配置。
+也可以临时用环境变量 `DEEPLX_API_KEY` 覆盖本地配置，不写盘。
 
 ## 翻译
 
-面向 AI 调用时推荐始终使用 `--json`：
+给 AI Agent 调用时建议始终带 `--json`：
 
 ```bash
 transx translate "Hello world" --to ZH --json
 ```
 
-从 stdin 读取：
+从 stdin 读：
 
 ```bash
 echo "Hello world" | transx translate --to ZH --json
 ```
 
-HTML/XML：
+翻译 HTML / XML 片段：
 
 ```bash
 transx translate '<p>Hello</p>' --to ZH --format html --json
 ```
 
-查看支持的语言代码：
+完整参数：
 
-```bash
-transx languages
-transx languages --json
+```text
+-t, --to <lang>              目标语言（必填）
+-s, --source <lang>          源语言，默认 auto
+    --format <plain|html|xml> 内容格式，默认 plain
+    --json                   输出 AI 友好的 JSON
+    --timeout <seconds>      本次请求超时
 ```
-
-当前内置清单与 DeepLX v1.2.2 同步，包含 37 个目标语言代码；`EN` 和 `PT` 是兼容别名，源语言还支持 `AUTO`。此命令无需初始化或联网。
-
-每次成功翻译都会写入本地历史，不记录 URL 或 API Key。历史按中国日期拆分为标准 JSON 文件，时间格式为 `YYYY-MM-DD HH:mm:ss.SSS`，不附带时区标记。
-
-## 翻译历史
-
-查看最近 20 条，或按条数和时间分页：
-
-```bash
-transx history
-transx history --limit 50 --offset 100
-transx history --from "2026-08-01" --to "2026-08-03"
-transx history --since 7d --json
-```
-
-搜索会同时匹配原文和译文，只要包含关键词就返回，可返回多条：
-
-```bash
-transx history search "环境审查"
-transx history search "review" --limit 50 --json
-```
-
-查看文件状态或清理记录：
-
-```bash
-transx history status
-transx history clear --oldest 100
-transx history clear --keep 1000
-transx history clear --before "2026-07-01"
-transx history clear --older-than 30d --yes
-transx history clear --from "2026-07-01" --to "2026-07-31" --yes
-transx history clear --all --yes
-```
-
-历史目录为 `~/.transx/history/`，包含 `index.json` 和按日期拆分的 `YYYY-MM-DD.json`。记录不限制条数；最早记录超过 30 天或文件总量超过 100 MB 时每天最多提醒一次，不会自动删除。
 
 成功输出：
 
@@ -130,53 +92,96 @@ transx history clear --all --yes
 {"ok":true,"data":"你好，世界","source_lang":"auto","target_lang":"ZH","provider":"deeplx-compatible"}
 ```
 
-失败输出到 stderr，并使用非零退出码：
+失败走 stderr，非零退出码，方便脚本捕获：
 
 ```json
-{"ok":false,"error":{"code":"CONFIG_NOT_INITIALIZED","message":"缺少 DeepLX URL 或 API Key，请先运行 transx init"}}
+{"ok":false,"error":{"code":"CONFIG_NOT_INITIALIZED","message":"缺少 DeepLX API Key，请先运行 transx init"}}
 ```
+
+查看支持的语言代码（不需要联网或初始化）：
+
+```bash
+transx languages
+transx languages --json
+```
+
+经实测 `api.deeplx.org` 支持 32 个目标语言，`EN` / `PT` 为直接可用代码；`EN-GB`、`EN-US`、`ES-419`、`HE`、`PT-BR`、`PT-PT`、`VI` 不可用。源语言支持 `AUTO` 及上述全部代码。
+
+## 翻译历史
+
+每条成功的翻译都会落到本地历史，不记录 URL 和 API Key。历史按中国时间拆分到 `YYYY-MM-DD.json`，时间格式 `YYYY-MM-DD HH:mm:ss.SSS`，不带时区标记。
+
+```bash
+transx history                         # 最近 20 条
+transx history --limit 50 --offset 100
+transx history --from "2026-08-01" --to "2026-08-03"
+transx history --since 7d --json
+```
+
+搜索原文和译文（任一包含关键词就返回）：
+
+```bash
+transx history search "环境审查" --json
+```
+
+查看文件状态、清理：
+
+```bash
+transx history status
+transx history clear --oldest 100
+transx history clear --keep 1000
+transx history clear --older-than 30d --yes
+transx history clear --from "2026-07-01" --to "2026-07-31" --yes
+transx history clear --all --yes
+```
+
+历史目录 `~/.transx/history/`，含 `index.json` 和按日期拆分的文件。不限制条数；当最早记录超过 30 天或文件总量超过 100 MB 时，每天最多提醒一次，不会自动删你的记录。
 
 ## 配置
 
 ```bash
-transx config
-transx config set-url 'https://your-deeplx.example/{key}/translate'
-transx config set-key
-transx config reset url
-transx config reset key
-transx config reset all
+transx config                  # 查看 URL 模板和完整 API Key
+transx config set-key          # 重新输入 Key（隐藏）
+transx config set-key --stdin  # 从 stdin 读 Key
+transx config reset key        # 删掉 Key
+transx config reset all        # 重置全部
 ```
 
-`transx config` 显示 URL 模板和完整 API Key，但不会显示拼接后的完整请求 URL。
+`transx config` 会显示完整 API Key，但不会显示拼接后的请求 URL。
 
 ## 版本与更新
 
 ```bash
-transx version
-transx version --check
-transx update
+transx version          # 当前版本
+transx version --check  # 对比 npm 上的最新版
+transx update           # 拉最新版并重新安装
 ```
 
-`transx update` 通过 npm Registry 获取最新版，并原子更新用户目录中的启动入口。旧版本目录会保留，便于排查或回退。
+`update` 走 npm Registry 拉最新版，原子替换启动入口；旧版本目录会保留，方便排查或回退。
+
+## 隐私和安全
+
+- 待翻译内容会发到你配置的 DeepLX-compatible 服务（默认 `api.deeplx.org`），别拿它翻译密码、令牌或不想离开本机的东西。
+- API Key 存在 `~/.transx/credentials.json`，POSIX 系统文件权限 0600。
+- 不收集任何遥测。
+- URL 与 Key 不会编译进程序。
 
 ## 开发
 
 ```bash
 npm install
-npm run check
-npm test
-npm run build
+npm run check    # 类型检查
+npm test         # 单元测试
+npm run build    # 编译到 dist/
 npm pack --dry-run
 ```
 
-要求 Node.js > 22。
+要求 Node.js > 22。每次提交会在 Windows、macOS、Linux 三系统跑类型检查、测试、构建和打包检查。
 
-所有提交均在 Windows、macOS、Linux 三系统上运行类型检查、单元测试、构建和 npm 打包检查。
+## 许可
 
-## 隐私和安全
+[MIT License](./LICENSE)。
 
-- 待翻译内容会发送到用户配置的第三方 DeepLX-compatible 服务。
-- 请勿翻译密码、访问令牌或不应离开本机的敏感内容。
-- URL 与 API Key 不会被编译进程序。
-- API Key 保存在 `~/.transx/credentials.json`，POSIX 系统使用仅当前用户可读的文件权限。
-- 本项目不收集遥测。
+## 友情链接
+
+- [LINUX DO](https://linux.do/)

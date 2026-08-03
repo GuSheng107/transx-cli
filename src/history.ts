@@ -385,9 +385,15 @@ export class HistoryStore {
         if (!isNodeError(error, "EEXIST")) {
           throw new TransxError("HISTORY_ERROR", "无法锁定翻译历史", 7, { cause: error });
         }
+        // 检测到过期锁时，先尝试用 rename 原子地“占位”接管，
+        // rename 成功者获得清理权，失败者说明锁已被其他进程接管，直接退回等待。
         try {
           const lockStat = await stat(this.lockPath);
-          if (Date.now() - lockStat.mtimeMs > HISTORY_STALE_LOCK_MS) await rm(this.lockPath, { force: true });
+          if (Date.now() - lockStat.mtimeMs > HISTORY_STALE_LOCK_MS) {
+            const staging = `${this.lockPath}.${randomUUID()}.stale`;
+            await rename(this.lockPath, staging);
+            await rm(staging, { force: true });
+          }
         } catch (statError) {
           if (!isNodeError(statError, "ENOENT")) throw statError;
         }

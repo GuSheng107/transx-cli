@@ -6,19 +6,11 @@ import {
   CONFIG_VERSION,
   DEFAULT_TARGET_LANGUAGE,
   DEFAULT_TIMEOUT_MS,
+  DEEPLX_URL_TEMPLATE,
   ENV_API_KEY,
-  ENV_URL_TEMPLATE,
-  URL_KEY_PLACEHOLDER,
 } from "./constants.js";
 import { TransxError } from "./errors.js";
 import { getConfigRoot } from "./paths.js";
-
-interface StoredConfig {
-  version: number;
-  urlTemplate: string;
-  defaultTarget: string;
-  timeoutMs: number;
-}
 
 interface StoredCredentials {
   version: number;
@@ -34,10 +26,9 @@ export interface ResolvedConfig {
 
 export interface ConfigStatus {
   configDirectory: string;
-  urlTemplate: string | null;
+  urlTemplate: string;
   maskedApiKey: string | null;
   initialized: boolean;
-  urlSource: "environment" | "local" | null;
   keySource: "environment" | "local" | null;
 }
 
@@ -66,28 +57,6 @@ async function writeJsonAtomic(filePath: string, value: unknown): Promise<void> 
   await rename(temporaryPath, filePath);
 }
 
-export function validateUrlTemplate(value: string): string {
-  const normalized = value.trim();
-  if (!normalized.includes(URL_KEY_PLACEHOLDER)) {
-    throw new TransxError(
-      "CONFIG_INVALID",
-      `URL 模板必须包含 ${URL_KEY_PLACEHOLDER}，例如 https://example.invalid/${URL_KEY_PLACEHOLDER}/translate`,
-      3,
-    );
-  }
-  try {
-    const parsed = new URL(normalized.replaceAll(URL_KEY_PLACEHOLDER, "sample-key"));
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      throw new Error("unsupported protocol");
-    }
-  } catch (error) {
-    throw new TransxError("CONFIG_INVALID", "URL 模板必须是有效的 HTTP 或 HTTPS 地址", 3, {
-      cause: error,
-    });
-  }
-  return normalized;
-}
-
 export function maskApiKey(apiKey: string): string {
   if (apiKey.length <= 8) {
     return "*".repeat(apiKey.length);
@@ -97,23 +66,11 @@ export function maskApiKey(apiKey: string): string {
 
 export class ConfigStore {
   readonly directory: string;
-  readonly configPath: string;
   readonly credentialsPath: string;
 
   constructor(directory = getConfigRoot()) {
     this.directory = directory;
-    this.configPath = path.join(directory, "config.json");
     this.credentialsPath = path.join(directory, "credentials.json");
-  }
-
-  async setUrlTemplate(urlTemplate: string): Promise<void> {
-    const existing = await readJson<StoredConfig>(this.configPath);
-    await writeJsonAtomic(this.configPath, {
-      version: CONFIG_VERSION,
-      urlTemplate: validateUrlTemplate(urlTemplate),
-      defaultTarget: existing?.defaultTarget || DEFAULT_TARGET_LANGUAGE,
-      timeoutMs: existing?.timeoutMs || DEFAULT_TIMEOUT_MS,
-    } satisfies StoredConfig);
   }
 
   async setApiKey(apiKey: string): Promise<void> {
@@ -127,61 +84,58 @@ export class ConfigStore {
     } satisfies StoredCredentials);
   }
 
-  async resetUrl(): Promise<void> {
-    await rm(this.configPath, { force: true });
-  }
-
   async resetKey(): Promise<void> {
     await rm(this.credentialsPath, { force: true });
   }
 
   async resetAll(): Promise<void> {
-    await Promise.all([this.resetUrl(), this.resetKey()]);
+    await this.resetKey();
   }
 
   async resolve(env: NodeJS.ProcessEnv = process.env): Promise<ResolvedConfig> {
-    const storedConfig = await readJson<StoredConfig>(this.configPath);
     const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
-    const urlTemplate = env[ENV_URL_TEMPLATE]?.trim() || storedConfig?.urlTemplate;
     const apiKey = env[ENV_API_KEY]?.trim() || storedCredentials?.apiKey;
 
-    if (!urlTemplate || !apiKey) {
+    if (!apiKey) {
       throw new TransxError(
         "CONFIG_NOT_INITIALIZED",
-        "缺少 DeepLX URL 或 API Key，请先运行 transx init",
+        "缺少 DeepLX API Key，请先运行 transx init",
         3,
       );
     }
 
     return {
-      urlTemplate: validateUrlTemplate(urlTemplate),
+      urlTemplate: DEEPLX_URL_TEMPLATE,
       apiKey,
-      defaultTarget: storedConfig?.defaultTarget || DEFAULT_TARGET_LANGUAGE,
-      timeoutMs: storedConfig?.timeoutMs || DEFAULT_TIMEOUT_MS,
+      defaultTarget: DEFAULT_TARGET_LANGUAGE,
+      timeoutMs: DEFAULT_TIMEOUT_MS,
     };
   }
 
   async status(env: NodeJS.ProcessEnv = process.env): Promise<ConfigStatus> {
-    const storedConfig = await readJson<StoredConfig>(this.configPath);
     const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
-    const envUrl = env[ENV_URL_TEMPLATE]?.trim();
     const envKey = env[ENV_API_KEY]?.trim();
-    const urlTemplate = envUrl || storedConfig?.urlTemplate || null;
     const apiKey = envKey || storedCredentials?.apiKey || null;
     return {
       configDirectory: this.directory,
-      urlTemplate,
+      urlTemplate: DEEPLX_URL_TEMPLATE,
       maskedApiKey: apiKey ? maskApiKey(apiKey) : null,
-      initialized: Boolean(urlTemplate && apiKey),
-      urlSource: envUrl ? "environment" : storedConfig?.urlTemplate ? "local" : null,
+      initialized: Boolean(apiKey),
       keySource: envKey ? "environment" : storedCredentials?.apiKey ? "local" : null,
     };
   }
 
   async statusWithApiKey(env: NodeJS.ProcessEnv = process.env): Promise<ConfigStatusWithApiKey> {
-    const status = await this.status(env);
     const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
-    const apiKey = env[ENV_API_KEY]?.trim() || storedCredentials?.apiKey || null;
-    return { ...status, apiKey };
+    const envKey = env[ENV_API_KEY]?.trim();
+    const apiKey = envKey || storedCredentials?.apiKey || null;
+    return {
+      configDirectory: this.directory,
+      urlTemplate: DEEPLX_URL_TEMPLATE,
+      maskedApiKey: apiKey ? maskApiKey(apiKey) : null,
+      apiKey,
+      initialized: Boolean(apiKey),
+      keySource: envKey ? "environment" : storedCredentials?.apiKey ? "local" : null,
+    };
   }
 }

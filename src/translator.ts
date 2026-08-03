@@ -75,8 +75,10 @@ export async function translate(
 
   const endpoint = buildEndpoint(config.urlTemplate, config.apiKey);
   const timeoutMs = request.timeoutMs || config.timeoutMs;
-  let lastError: unknown;
+  let lastNetworkError: unknown;
 
+  // 仅对网络层错误（超时、连接失败）和可重试 HTTP 状态（429/5xx）重试。
+  // 业务层错误（TransxError）一律不重试，避免对无效响应或配置问题反复请求。
   for (let attempt = 0; attempt <= DEFAULT_MAX_RETRIES; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -123,10 +125,12 @@ export async function translate(
         provider: "deeplx-compatible",
       };
     } catch (error) {
-      lastError = error;
+      // TransxError 是业务层错误（HTTP 错误码、响应格式问题等），直接抛出不重试。
       if (error instanceof TransxError) {
         throw error;
       }
+      // 其余视为网络层错误（超时、DNS、连接重置等），记录后重试。
+      lastNetworkError = error;
       if (attempt < DEFAULT_MAX_RETRIES) {
         await delay(RETRY_BASE_DELAY_MS * 2 ** attempt);
         continue;
@@ -136,11 +140,11 @@ export async function translate(
     }
   }
 
-  const isTimeout = lastError instanceof Error && lastError.name === "AbortError";
+  const isTimeout = lastNetworkError instanceof Error && lastNetworkError.name === "AbortError";
   throw new TransxError(
     "NETWORK_ERROR",
     isTimeout ? `DeepLX 请求超时（${timeoutMs}ms）` : "无法连接 DeepLX 服务",
     4,
-    { cause: lastError },
+    { cause: lastNetworkError },
   );
 }
