@@ -21,7 +21,7 @@
 ## 安装
 
 ```bash
-npx transx-cli@latest install
+npx @gushengcode/transx-cli@latest install
 ```
 
 这会把 `transx` 装到用户目录，并把启动入口加进 PATH：

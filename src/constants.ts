@@ -1,5 +1,5 @@
 export const APP_NAME = "transx";
-export const PACKAGE_NAME = "transx-cli";
+export const PACKAGE_NAME = "@gushengcode/transx-cli";
 export const CONFIG_VERSION = 1;
 export const DEFAULT_SOURCE_LANGUAGE = "auto";
 export const DEFAULT_TARGET_LANGUAGE = "ZH";

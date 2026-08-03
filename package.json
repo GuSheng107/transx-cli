@@ -1,5 +1,5 @@
 {
-  "name": "transx-cli",
+  "name": "@gushengcode/transx-cli",
   "version": "1.0.0",
   "description": "TransX CLI — DeepLX 特供版",
   "type": "module",

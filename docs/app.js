@@ -24,7 +24,7 @@ function setPlatform(name) {
   platformCurrent.querySelector(".platform-label").textContent = labels[name];
   platformCurrent.dataset.platform = name;
   platformOptions.forEach((option) => option.setAttribute("aria-selected", String(option.dataset.platform === name)));
-  if (installCode) installCode.textContent = "npx transx-cli@latest install";
+  if (installCode) installCode.textContent = "npx @gushengcode/transx-cli@latest install";
 }
 
 if (platformCurrent && platformMenu) {
