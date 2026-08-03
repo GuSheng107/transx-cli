@@ -12,25 +12,41 @@ function showToast(message) {
   toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
 }
 
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return;
+  } catch {
+    const input = document.createElement("textarea");
+    input.value = text;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    const copied = document.execCommand("copy");
+    input.remove();
+    if (!copied) throw new Error("copy failed");
+  }
+}
+
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.addEventListener("click", async () => {
     const target = document.getElementById(button.dataset.copy);
     if (!target) return;
     try {
-      await navigator.clipboard.writeText(target.textContent.trim());
+      await copyText(target.textContent.trim());
       showToast("已复制");
-      if (button.closest(".cmd-block, .command-syntax")) {
-        const previousTimer = copyRestoreTimers.get(button);
-        if (previousTimer) window.clearTimeout(previousTimer);
-        button.textContent = "已复制";
-        button.classList.add("copied");
-        const restoreTimer = window.setTimeout(() => {
-          button.textContent = "复制";
-          button.classList.remove("copied");
-          copyRestoreTimers.delete(button);
-        }, 1800);
-        copyRestoreTimers.set(button, restoreTimer);
-      }
+      const previousTimer = copyRestoreTimers.get(button);
+      if (previousTimer) window.clearTimeout(previousTimer);
+      button.textContent = "已复制";
+      button.classList.add("copied");
+      const restoreTimer = window.setTimeout(() => {
+        button.textContent = "复制";
+        button.classList.remove("copied");
+        copyRestoreTimers.delete(button);
+      }, 1800);
+      copyRestoreTimers.set(button, restoreTimer);
     } catch {
       showToast("复制失败，请手动选择");
     }

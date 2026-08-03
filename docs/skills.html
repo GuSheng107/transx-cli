@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f3f6fb" />
+    <meta name="theme-color" content="#edf3ff" />
     <meta name="description" content="下载 TransX Translate Skill，通过 Python、Node.js 或 TransX CLI 调用 DLX。" />
     <meta property="og:title" content="TransX Translate Skill" />
     <meta property="og:description" content="通过 Python、Node.js 或 TransX CLI 调用 DLX。" />
     <meta property="og:type" content="website" />
     <title>Skills — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260803-10" />
-    <script src="./app.js?v=20260803-10" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260804-1" />
+    <script src="./app.js?v=20260804-1" defer></script>
   </head>
   <body class="skills-page">
     <header class="topbar">
@@ -29,36 +29,25 @@
 
     <main class="skills-main">
       <section class="skills-hero">
-        <div class="skill-orbit skill-orbit-one" aria-hidden="true"></div>
-        <div class="skill-orbit skill-orbit-two" aria-hidden="true"></div>
-        <div class="skills-hero-copy">
+        <div class="skills-hero-inner">
           <span class="skill-eyebrow">TRANSX SKILL</span>
           <h1>安装 TransX<br /><em>翻译 Skill</em></h1>
           <p>选择 Python、Node.js 或 TransX CLI，之后直接使用。</p>
-          <div class="skill-npx-command">
-            <span class="prompt" aria-hidden="true">$</span>
-            <code id="skill-install-code">npx skills add GuSheng107/transx-cli --skill transx-translate -g</code>
-            <button type="button" class="copy-btn" data-copy="skill-install-code" aria-label="复制 Skill 安装命令">复制</button>
-          </div>
-          <div class="skills-actions">
+          <div class="skill-install-center">
+            <div class="skill-quick-start">
+              <strong>快速开始</strong>
+              <p>请将下面的指令发给 Agent</p>
+            </div>
+            <div class="skill-agent-prompt">
+              <p id="skill-agent-prompt">请使用 <code>npx skills add GuSheng107/transx-cli --skill transx-translate -g</code> 安装该 Skill，并引导用户完成配置；测试翻译有效后汇报结果。</p>
+              <button type="button" class="copy-btn" data-copy="skill-agent-prompt" aria-label="复制发给 Agent 的提示词">复制</button>
+            </div>
             <a class="download-skill" href="./transx-skills.zip" download>
               <span class="download-icon" aria-hidden="true">↓</span>
-              <span><strong>下载 ZIP</strong><small>包含 Skill 和脚本</small></span>
+              <span class="download-text"><strong>下载 ZIP</strong><small>包含 Skill 和脚本</small></span>
             </a>
-            <a class="ghost-link" href="#install-skill">查看两种安装方式</a>
           </div>
-        </div>
-        <div class="skill-preview" aria-label="Skill 工作流预览">
-          <div class="skill-preview-head"><span>transx-translate</span><b>SKILL.md</b></div>
-          <div class="skill-preview-body">
-            <div class="preview-row"><i>01</i><span>检测本机环境</span><b>detect</b></div>
-            <div class="preview-line"></div>
-            <div class="preview-row"><i>02</i><span>首次选择调用方式</span><b>choose</b></div>
-            <div class="preview-line"></div>
-            <div class="preview-row"><i>03</i><span>保存选择</span><b>save</b></div>
-            <div class="preview-line"></div>
-            <div class="preview-row active"><i>04</i><span>翻译并记录历史</span><b>run</b></div>
-          </div>
+          <a class="ghost-link" href="#install-skill">查看两种安装方式</a>
         </div>
       </section>
 
@@ -73,13 +62,13 @@
             <div class="mode-top"><span class="mode-symbol">PY</span><b>推荐</b></div>
             <h3>Python 脚本</h3>
             <p>通过 Python 调用 DLX。</p>
-            <ul><li>需要 Python 3</li><li>PDF 使用 pdfplumber</li><li>JSON 输出</li></ul>
+            <ul><li>需要 Python 3</li><li>Python 生态</li><li>文本与文件翻译</li></ul>
           </article>
           <article class="mode-card">
             <div class="mode-top"><span class="mode-symbol">JS</span><b>脚本</b></div>
             <h3>Node.js 脚本</h3>
             <p>使用 Skill 内的 Node.js 脚本。</p>
-            <ul><li>需要 Node.js 18+</li><li>固定依赖版本</li><li>JSON 输出</li></ul>
+            <ul><li>需要 Node.js 18+</li><li>Node.js 生态</li><li>文本与文件翻译</li></ul>
           </article>
           <article class="mode-card cli-card">
             <div class="mode-top"><span class="mode-symbol">TX</span><b>CLI</b></div>
@@ -99,20 +88,38 @@
         <div class="section-heading">
           <span class="kicker">INSTALL</span>
           <h2 id="install-title">安装 Skill</h2>
-          <p>使用 npx 或下载 ZIP。</p>
+          <p>任选一种方式安装，然后完成首次配置。</p>
         </div>
         <div class="install-skill-grid">
-          <ol class="install-steps">
-            <li><span>01</span><div><strong>npx 安装</strong><p><code>npx skills add GuSheng107/transx-cli --skill transx-translate -g</code></p></div></li>
-            <li><span>02</span><div><strong>ZIP 安装</strong><p>解压后复制整个 <code>transx-translate</code> 文件夹。</p></div></li>
-            <li><span>03</span><div><strong>首次配置</strong><p>选择模式并输入 DLX API Key。</p></div></li>
-          </ol>
+          <div class="install-options">
+            <div class="install-option-card">
+              <span class="install-option-tag">方式一</span>
+              <h3>npx 安装</h3>
+              <p>一行命令全局安装 Skill。</p>
+              <div class="command-syntax command-syntax-card">
+                <code id="skill-install-code-card">npx skills add GuSheng107/transx-cli --skill transx-translate -g</code>
+                <button type="button" class="copy-btn" data-copy="skill-install-code-card" aria-label="复制 npx 安装命令">复制</button>
+              </div>
+            </div>
+            <div class="install-option-card">
+              <span class="install-option-tag">方式二</span>
+              <h3>ZIP 安装</h3>
+              <p>下载后复制 <code>transx-translate</code> 文件夹到任意位置。</p>
+              <a class="download-skill download-skill-inline" href="./transx-skills.zip" download>
+                <span class="download-icon" aria-hidden="true">↓</span>
+                <span class="download-text"><strong>下载 ZIP</strong><small>包含 Skill 和脚本</small></span>
+              </a>
+            </div>
+          </div>
+          <div class="install-next-step">
+            <span class="install-option-tag next-tag">下一步</span>
+            <h3>首次配置</h3>
+            <p>选择调用方式并输入 DLX API Key，之后即可开始翻译。</p>
+          </div>
           <div class="skill-structure">
             <h3>文件结构</h3>
             <pre class="skill-tree"><code>transx-translate/
 ├── SKILL.md
-├── agents/
-│   └── openai.yaml
 ├── assets/
 │   ├── SKILL.original.md
 │   └── SKILL.*.md

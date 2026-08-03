@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f3f6fb" />
+    <meta name="theme-color" content="#edf3ff" />
     <meta name="description" content="TransX CLI 工具文档：逐条说明每个指令的语法、专属参数、示例与返回格式。" />
     <title>工具文档 — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260803-10" />
-    <script src="./app.js?v=20260803-10" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260804-1" />
+    <script src="./app.js?v=20260804-1" defer></script>
   </head>
   <body class="docs-page">
     <header class="topbar">
@@ -51,6 +51,16 @@
           <h1><code>transx</code></h1>
           <p class="doc-lead">打开交互界面，可翻译文本或文件。非交互环境输出帮助。</p>
           <div class="cmd-block command-syntax"><code id="code-start">transx</code><button type="button" class="copy-btn" data-copy="code-start" aria-label="复制 transx 命令">复制</button></div>
+          <div class="terminal-state-grid">
+            <figure>
+              <img src="./terminal-unconfigured.png?v=20260804-1" alt="TransX CLI 未配置状态" width="1400" height="760" />
+              <figcaption>未配置</figcaption>
+            </figure>
+            <figure>
+              <img src="./terminal-configured.png?v=20260804-1" alt="TransX CLI 已配置状态" width="1400" height="760" />
+              <figcaption>已配置</figcaption>
+            </figure>
+          </div>
         </article>
 
         <article class="doc-section command-doc" id="cmd-help">

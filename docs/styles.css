@@ -19,6 +19,10 @@
   --terminal-dim: #9babbe;
   --danger: #ff5e5b;
   --orange: #ff8c42;
+  --page-gradient:
+    radial-gradient(circle at 10% 8%, rgba(62, 126, 237, 0.18), transparent 32%),
+    radial-gradient(circle at 88% 16%, rgba(168, 239, 53, 0.13), transparent 30%),
+    linear-gradient(135deg, #edf3ff 0%, #f8faff 48%, #f1f8ed 100%);
   --mono: "Cascadia Code", "SFMono-Regular", "JetBrains Mono", Consolas, monospace;
   --display: "Bahnschrift", "Avenir Next Condensed", "PingFang SC", "Microsoft YaHei", sans-serif;
   --body: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -26,15 +30,38 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  min-height: 100%;
+  background: #edf3ff;
+  scroll-behavior: smooth;
+}
 
 body {
-  background: var(--bg);
+  min-height: 100vh;
+  background: var(--page-gradient);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+.docs-page,
+.skills-page {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.docs-page::-webkit-scrollbar,
+.skills-page::-webkit-scrollbar { width: 10px; }
+.docs-page::-webkit-scrollbar-track,
+.skills-page::-webkit-scrollbar-track { background: rgba(225, 233, 246, 0.78); }
+.docs-page::-webkit-scrollbar-thumb,
+.skills-page::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(225, 233, 246, 0.78);
+  border-radius: 999px;
+  background: rgba(91, 116, 155, 0.52);
 }
 
 .home-page {
@@ -55,7 +82,7 @@ code, pre { font-family: var(--mono); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-soft);
   z-index: 100;
@@ -349,19 +376,33 @@ code, pre { font-family: var(--mono); }
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 34px; height: 34px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-dim);
+  width: 68px;
+  min-width: 68px;
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #3d82ed;
+  color: #ffffff;
+  font: 700 12px/1 var(--body);
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .copy-btn:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #286bd6;
   color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(40, 107, 214, 0.24);
+}
+
+.copy-btn.copied,
+.copy-btn.copied:hover {
+  background: #17a454;
+  color: #ffffff;
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(23, 164, 84, 0.22);
 }
 
 .install-hint {
@@ -394,7 +435,8 @@ code, pre { font-family: var(--mono); }
   height: calc(100vh - 56px);
   padding: 38px 28px;
   border-right: 1px solid var(--border);
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
   box-shadow: 14px 0 38px rgba(38, 58, 92, 0.05);
   z-index: 2;
   overflow-y: auto;
@@ -455,9 +497,7 @@ code, pre { font-family: var(--mono); }
 .docs-nav a.active .nav-label small { color: var(--text-dim); }
 
 .docs-content {
-  background:
-    linear-gradient(rgba(40, 111, 232, 0.025) 1px, transparent 1px),
-    var(--bg);
+  background-image: linear-gradient(rgba(40, 111, 232, 0.03) 1px, transparent 1px);
   background-size: 100% 64px;
   min-width: 0;
   padding: 0 clamp(30px, 6vw, 96px);
@@ -511,11 +551,25 @@ code, pre { font-family: var(--mono); }
   background: var(--terminal);
 }
 
+.command-syntax-card {
+  width: 100%;
+  margin: 4px 0 0;
+  padding-right: 100px;
+}
+
 .command-syntax code {
+  flex: 1;
+  min-width: 0;
   color: var(--terminal-text);
   font: 13px/1.5 var(--mono);
   white-space: nowrap;
   overflow-x: auto;
+}
+
+.command-syntax-card code {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .no-options {
@@ -785,40 +839,12 @@ code, pre { font-family: var(--mono); }
   white-space: nowrap;
 }
 
-.docs-page .cmd-block .copy-btn,
-.docs-page .command-syntax .copy-btn {
+.cmd-block .copy-btn,
+.command-syntax .copy-btn,
+.skill-agent-prompt .copy-btn {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: auto;
-  min-width: 58px;
-  height: 32px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 6px;
-  background: #3d82ed;
-  color: #ffffff;
-  font: 700 12px/1 var(--body);
-  white-space: nowrap;
-  transform: translateY(0);
-}
-
-.docs-page .cmd-block .copy-btn:hover,
-.docs-page .command-syntax .copy-btn:hover {
-  background: #286bd6;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(40, 107, 214, 0.24);
-}
-
-.docs-page .cmd-block .copy-btn.copied,
-.docs-page .cmd-block .copy-btn.copied:hover,
-.docs-page .command-syntax .copy-btn.copied,
-.docs-page .command-syntax .copy-btn.copied:hover {
-  background: #17a454;
-  color: #ffffff;
-  transform: translateY(0);
-  box-shadow: 0 6px 16px rgba(23, 164, 84, 0.22);
 }
 
 .doc-note {
@@ -829,27 +855,30 @@ code, pre { font-family: var(--mono); }
 
 /* ===== Skills 独立页 ===== */
 
-.skills-main {
-  padding-top: 56px;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(40, 111, 232, 0.12), transparent 28%),
-    radial-gradient(circle at 88% 18%, rgba(168, 239, 53, 0.12), transparent 24%),
-    var(--bg);
-}
+.skills-main { background: transparent; }
+
+.skills-main { padding-top: 56px; }
 
 .skills-hero {
   position: relative;
-  min-height: 570px;
-  padding: 92px max(5vw, 32px) 76px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.75fr);
+  min-height: 560px;
+  padding: 92px max(5vw, 32px) 80px;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: clamp(50px, 7vw, 110px);
+  text-align: center;
   overflow: hidden;
   border-bottom: 1px solid var(--border-soft);
 }
 
-.skills-hero-copy { position: relative; z-index: 2; max-width: 760px; }
+.skills-hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 820px;
+}
 
 .skill-eyebrow {
   display: inline-flex;
@@ -871,50 +900,109 @@ code, pre { font-family: var(--mono); }
 
 .skills-hero h1 em { color: var(--accent); font-style: normal; }
 
-.skills-hero-copy > p {
-  max-width: 650px;
+.skills-hero-inner > p {
+  max-width: 560px;
   color: var(--text-dim);
   font-size: clamp(15px, 1.5vw, 18px);
 }
 
-.skill-npx-command {
+.skill-install-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 720px;
+  margin-top: 36px;
+}
+
+.skill-quick-start {
+  display: grid;
+  gap: 5px;
+  text-align: center;
+}
+
+.skill-quick-start strong {
+  color: var(--text);
+  font: 750 19px/1.2 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.skill-quick-start p {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.skill-agent-prompt {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
-  max-width: 690px;
-  margin-top: 34px;
-  padding: 13px 14px 13px 17px;
-  border: 1px solid #34455f;
-  border-radius: 10px;
-  background: var(--terminal);
-  box-shadow: 0 14px 32px rgba(25, 42, 70, 0.14);
+  width: 100%;
+  min-height: 64px;
+  padding: 13px 92px 13px 17px;
+  border: 1px solid rgba(78, 139, 236, 0.38);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #101c2c, #14243a);
+  box-shadow: 0 16px 38px rgba(25, 42, 70, 0.16);
 }
 
-.skill-npx-command .prompt { color: var(--lime); font: 700 14px/1 var(--mono); }
-.skill-npx-command code { flex: 1; min-width: 0; overflow-x: auto; color: var(--terminal-text); font: 11px/1.45 var(--mono); white-space: nowrap; }
-.skill-npx-command .copy-btn { width: auto; min-width: 58px; height: 32px; padding: 0 12px; border-color: #40516a; color: var(--terminal-dim); font: 700 11px/1 var(--body); }
-.skill-npx-command .copy-btn:hover { color: #10203c; background: var(--lime); border-color: var(--lime); }
+.skill-agent-prompt > p {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+  color: var(--terminal-dim);
+  font: 12px/1.7 var(--mono);
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.skill-agent-prompt > p code {
+  color: #ffffff;
+  font: 700 12px/1.7 var(--mono);
+}
 
 .skills-actions { display: flex; align-items: center; gap: 22px; margin-top: 17px; }
 
 .download-skill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 13px;
-  min-width: 330px;
-  padding: 15px 20px;
-  border-radius: 11px;
-  background: var(--accent);
+  justify-content: flex-start;
+  gap: 14px;
+  min-width: 280px;
+  padding: 14px 22px 14px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent) 0%, #4c8af0 100%);
   color: #fff;
-  box-shadow: 0 16px 36px rgba(40, 111, 232, 0.25);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 14px 34px rgba(40, 111, 232, 0.28), inset 0 1px 0 rgba(255,255,255,0.14);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-.download-skill:hover { transform: translateY(-2px); box-shadow: 0 20px 42px rgba(40, 111, 232, 0.32); }
-.download-skill strong { display: block; font-size: 14px; }
-.download-skill small { display: block; margin-top: 3px; opacity: 0.75; font-size: 11px; }
-.download-icon { font: 500 26px/1 var(--mono); }
-.ghost-link { color: var(--accent); font-size: 13px; font-weight: 700; }
+.download-skill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 46px rgba(40, 111, 232, 0.36), inset 0 1px 0 rgba(255,255,255,0.18);
+  filter: brightness(1.04);
+}
+
+.download-skill:active { transform: translateY(0); }
+
+.download-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  font: 500 22px/1 var(--mono);
+  backdrop-filter: blur(4px);
+}
+
+.download-text { text-align: left; }
+.download-skill strong { display: block; font: 700 15px/1.2 var(--body); }
+.download-skill small { display: block; margin-top: 3px; opacity: 0.82; font: 500 11px/1.2 var(--body); }
+.download-skill-inline { width: 100%; min-width: 0; margin-top: auto; }
+.ghost-link { margin-top: 20px; color: var(--accent); font-size: 13px; font-weight: 700; }
 
 .skill-preview {
   position: relative;
@@ -999,14 +1087,75 @@ code, pre { font-family: var(--mono); }
 .mode-retention { margin-top: 12px; color: var(--text-mute); font-size: 12px; text-align: center; }
 
 .install-section { border-top: 1px solid var(--border-soft); }
-.install-skill-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 54px; align-items: center; margin-top: 40px; }
-.install-steps { list-style: none; }
-.install-steps li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border-soft); }
-.install-steps li > span { color: var(--accent); font: 800 11px/1.6 var(--mono); }
-.install-steps strong { font-size: 15px; }
-.install-steps p { margin-top: 4px; color: var(--text-dim); font-size: 13px; overflow-wrap: anywhere; }
-.install-steps code { color: var(--accent); font-size: 11px; overflow-wrap: anywhere; }
-.skill-structure h3 { margin-bottom: 13px; color: var(--text); font: 750 15px/1 var(--display); }
+.install-skill-grid { display: flex; flex-direction: column; gap: 18px; margin-top: 40px; }
+
+.install-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+.install-option-card,
+.install-next-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(40, 58, 90, 0.06);
+  min-width: 0;
+  width: 100%;
+}
+
+.install-option-card h3,
+.install-next-step h3 {
+  font: 750 19px/1 var(--display);
+  color: var(--text);
+}
+
+.install-option-card > p,
+.install-next-step > p {
+  flex: 1;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.install-option-card > code {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--terminal-deep);
+  color: var(--terminal-text);
+  font: 11px/1.5 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.install-option-tag {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--accent-glow);
+  color: var(--accent);
+  font: 800 10px/1 var(--mono);
+  letter-spacing: 0.05em;
+}
+
+.install-next-step {
+  border-color: rgba(168, 239, 53, 0.5);
+  background: rgba(168, 239, 53, 0.08);
+}
+
+.next-tag { background: rgba(168, 239, 53, 0.35); color: #3f5a12; }
+
+.skill-structure { max-width: 720px; margin: 16px auto 0; width: 100%; }
+.skill-structure h3 { margin-bottom: 13px; color: var(--text); font: 750 15px/1 var(--display); text-align: center; }
 .skill-tree { padding: 28px; border: 1px solid #34455f; border-radius: 12px; background: var(--terminal); color: var(--terminal-text); font-size: 12px; line-height: 1.8; overflow-x: auto; box-shadow: 0 20px 50px rgba(25, 42, 70, 0.16); }
 .skill-security { margin-top: 34px; padding: 16px 18px; border-left: 3px solid var(--orange); background: #fff; color: var(--text-dim); font-size: 12px; }
 .skill-security code { color: var(--accent); font-size: 11px; }
@@ -1070,12 +1219,10 @@ code, pre { font-family: var(--mono); }
 /* ===== 响应式 ===== */
 
 @media (max-width: 900px) {
-  .skills-hero { grid-template-columns: 1fr; padding-top: 70px; }
-  .skills-hero-copy { max-width: 700px; }
-  .skill-preview { max-width: 620px; transform: none; }
+  .skills-hero { padding: 78px 24px 64px; }
+  .install-options { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: 1fr; }
   .mode-card > p { min-height: 0; }
-  .install-skill-grid { grid-template-columns: 1fr; }
   .docs-layout {
     grid-template-columns: 1fr;
     margin-top: 50px;
@@ -1112,18 +1259,18 @@ code, pre { font-family: var(--mono); }
   .topbar { padding: 0 16px; height: 50px; }
   .topnav a { padding: 6px 9px; font-size: 12px; }
   .topnav-github { display: none; }
-  .skills-hero { min-height: auto; padding: 62px 20px 52px; gap: 42px; }
-  .skills-hero h1 { font-size: 41px; }
-  .skills-actions { align-items: stretch; flex-direction: column; }
-  .skill-npx-command { align-items: flex-start; flex-wrap: wrap; }
-  .skill-npx-command code { flex-basis: calc(100% - 28px); white-space: normal; overflow-wrap: anywhere; }
-  .skill-npx-command .copy-btn { margin-left: 28px; }
+  .skills-hero { min-height: auto; padding: 62px 18px 48px; }
+  .skills-hero h1 { font-size: 38px; }
+  .skill-install-center { width: 100%; }
+  .skill-agent-prompt { align-items: flex-start; min-height: 58px; padding: 12px 84px 12px 14px; }
+  .skill-agent-prompt .copy-btn { top: 10px; right: 10px; height: 30px; padding: 0 12px; font-size: 11px; }
+  .command-syntax code { white-space: normal; overflow-wrap: anywhere; }
   .download-skill { min-width: 0; width: 100%; }
   .ghost-link { text-align: center; }
-  .skill-preview-body { padding: 20px 15px; }
-  .preview-row { grid-template-columns: 28px 1fr; font-size: 11px; }
-  .preview-row b { display: none; }
-  .skills-section { padding: 62px 20px; }
+  .skills-section { padding: 52px 18px; }
+  .install-option-card,
+  .install-next-step { padding: 18px; }
+  .skill-tree { padding: 20px; font-size: 11px; }
   .shared-history { align-items: flex-start; }
   .home-main { padding: 50px 16px 32px; }
   .hero-copy { padding: 40px 0 36px; }
