@@ -7,3 +7,5 @@ npm-debug.log*
 .tmp-e2e/
 npm_recovery_codes.txt
 .npmrc
+__pycache__/
+*.pyc
