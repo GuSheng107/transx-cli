@@ -7,13 +7,10 @@ import {
 import { TransxError } from "./errors.js";
 import type { ResolvedConfig } from "./config.js";
 
-export type ContentFormat = "plain" | "html" | "xml";
-
 export interface TranslationRequest {
   text: string;
   targetLang: string;
   sourceLang?: string;
-  format?: ContentFormat;
   timeoutMs?: number;
 }
 
@@ -52,7 +49,6 @@ export async function translate(
   const text = request.text;
   const targetLang = request.targetLang.trim().toUpperCase();
   const sourceLang = request.sourceLang?.trim() || DEFAULT_SOURCE_LANGUAGE;
-  const format = request.format || "plain";
 
   if (!text.trim()) {
     throw new TransxError("INVALID_ARGUMENT", "待翻译文本不能为空", 2);
@@ -60,19 +56,11 @@ export async function translate(
   if (!targetLang) {
     throw new TransxError("INVALID_ARGUMENT", "必须通过 --to 指定目标语言", 2);
   }
-  if (!(["plain", "html", "xml"] as const).includes(format)) {
-    throw new TransxError("INVALID_ARGUMENT", "--format 仅支持 plain、html 或 xml", 2);
-  }
-
   const payload: Record<string, string> = {
     text,
     source_lang: sourceLang,
     target_lang: targetLang,
   };
-  if (format !== "plain") {
-    payload.tag_handling = format;
-  }
-
   const endpoint = buildEndpoint(config.urlTemplate, config.apiKey);
   const timeoutMs = request.timeoutMs || config.timeoutMs;
   let lastNetworkError: unknown;

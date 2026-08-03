@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f6fb" />
+    <meta name="description" content="下载 TransX Translate Skill，让 AI 使用 Python、Node.js 脚本或 TransX CLI 调用 DeepLX 翻译。" />
+    <meta property="og:title" content="TransX Translate Skill" />
+    <meta property="og:description" content="一次选择本地调用方式，后续由 AI 直接完成 DeepLX 翻译并共享历史记录。" />
+    <meta property="og:type" content="website" />
+    <title>Skills — TransX CLI</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css?v=20260803-10" />
+    <script src="./app.js?v=20260803-10" defer></script>
+  </head>
+  <body class="skills-page">
+    <header class="topbar">
+      <a class="logo" href="./index.html" aria-label="TransX CLI 首页">
+        <span class="logo-icon">TX</span>
+        <span class="logo-text">TransX</span>
+      </a>
+      <nav class="topnav" aria-label="主导航">
+        <a href="./index.html">CLI</a>
+        <a href="./docs.html">工具文档</a>
+        <a class="active" href="./skills.html" aria-current="page">Skills</a>
+        <a class="topnav-github" href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main class="skills-main">
+      <section class="skills-hero">
+        <div class="skill-orbit skill-orbit-one" aria-hidden="true"></div>
+        <div class="skill-orbit skill-orbit-two" aria-hidden="true"></div>
+        <div class="skills-hero-copy">
+          <span class="skill-eyebrow">AI AGENT SKILL</span>
+          <h1>让 AI 自己选择<br /><em>最合适的翻译入口</em></h1>
+          <p>首次检测本机环境并完成一次选择。之后 Skill 会在本地精简自身，只保留已经选定的调用流程。</p>
+          <div class="skill-npx-command">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code id="skill-install-code">npx skills add GuSheng107/transx-cli --skill transx-translate -g</code>
+            <button type="button" class="copy-btn" data-copy="skill-install-code" aria-label="复制 Skill 安装命令">复制</button>
+          </div>
+          <div class="skills-actions">
+            <a class="download-skill" href="./transx-skills.zip" download>
+              <span class="download-icon" aria-hidden="true">↓</span>
+              <span><strong>下载 ZIP 手动安装</strong><small>包含 Skill、Python 与 Node.js 脚本</small></span>
+            </a>
+            <a class="ghost-link" href="#install-skill">查看两种安装方式</a>
+          </div>
+        </div>
+        <div class="skill-preview" aria-label="Skill 工作流预览">
+          <div class="skill-preview-head"><span>transx-translate</span><b>SKILL.md</b></div>
+          <div class="skill-preview-body">
+            <div class="preview-row"><i>01</i><span>检测 Python / Node.js / TransX CLI</span><b>detect</b></div>
+            <div class="preview-line"></div>
+            <div class="preview-row"><i>02</i><span>首次选择调用方式</span><b>choose</b></div>
+            <div class="preview-line"></div>
+            <div class="preview-row"><i>03</i><span>写入偏好并精简 Skill</span><b>persist</b></div>
+            <div class="preview-line"></div>
+            <div class="preview-row active"><i>04</i><span>翻译并记录共享历史</span><b>run</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="skills-section" aria-labelledby="mode-title">
+        <div class="section-heading">
+          <span class="kicker">ONE CHOICE, THREE WORKFLOWS</span>
+          <h2 id="mode-title">三种调用方式</h2>
+          <p>Agent 先报告检测结果，再由用户选定一种方式。选定后，其余方式不会继续出现在 Skill 提示词中。</p>
+        </div>
+        <div class="mode-grid">
+          <article class="mode-card recommended">
+            <div class="mode-top"><span class="mode-symbol">PY</span><b>推荐</b></div>
+            <h3>Python 脚本</h3>
+            <p>仅使用 Python 标准库，直接请求 <code>api.deeplx.org</code>，无需安装 TransX CLI。</p>
+            <ul><li>需要 Python 3</li><li>仅支持纯文本翻译</li><li>输出稳定 JSON</li></ul>
+          </article>
+          <article class="mode-card">
+            <div class="mode-top"><span class="mode-symbol">JS</span><b>脚本</b></div>
+            <h3>Node.js 脚本</h3>
+            <p>使用随 Skill 附带的单文件请求脚本，适合已有 Node.js 环境的用户。</p>
+            <ul><li>需要 Node.js 18+</li><li>无需安装 CLI</li><li>输出稳定 JSON</li></ul>
+          </article>
+          <article class="mode-card cli-card">
+            <div class="mode-top"><span class="mode-symbol">TX</span><b>CLI</b></div>
+            <h3>TransX CLI</h3>
+            <p>通过安装命令部署完整 CLI，Skill 随后专门指导 Agent 使用 <code>transx</code>。</p>
+            <ul><li>仅支持 Node.js &gt; 22</li><li>自动安装或复用 CLI</li><li>完整命令行能力</li></ul>
+          </article>
+        </div>
+        <div class="shared-history">
+          <span class="history-mark" aria-hidden="true">↻</span>
+          <div><strong>一套历史记录</strong><p>Python 脚本、Node.js 脚本与 TransX CLI 均写入 <code>~/.transx/history/</code>，切换调用方式也不会割裂记录。</p></div>
+        </div>
+        <p class="mode-retention">切换模式只更新本地 Skill 文档与偏好；附带脚本和已安装的 CLI 都会原样保留。</p>
+      </section>
+
+      <section class="skills-section install-section" id="install-skill" aria-labelledby="install-title">
+        <div class="section-heading">
+          <span class="kicker">INSTALL</span>
+          <h2 id="install-title">安装 Skill</h2>
+          <p>推荐使用官方 Skills CLI 从 GitHub 仓库安装；也可以下载 ZIP，手动放入 AI 工具能够发现 Skill 的目录。</p>
+        </div>
+        <div class="install-skill-grid">
+          <ol class="install-steps">
+            <li><span>01</span><div><strong>推荐：使用 npx 安装</strong><p>运行 <code>npx skills add GuSheng107/transx-cli --skill transx-translate -g</code>，由 Skills CLI 自动安装到选定 Agent。</p></div></li>
+            <li><span>02</span><div><strong>备选：下载 ZIP</strong><p>解压 <code>transx-skills.zip</code>，将整个 <code>transx-translate</code> 文件夹复制到 Skills 根目录。</p></div></li>
+            <li><span>03</span><div><strong>向 Agent 发起翻译</strong><p>首次调用会检测环境、确认三种现有模式之一并安全配置 DeepLX API Key。</p></div></li>
+          </ol>
+          <div class="skill-structure">
+            <h3>文件结构</h3>
+            <pre class="skill-tree"><code>transx-translate/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+├── assets/
+│   ├── SKILL.original.md
+│   └── SKILL.*.md
+└── scripts/
+    ├── translate.py
+    ├── translate.mjs
+    └── history.*</code></pre>
+          </div>
+        </div>
+        <p class="skill-security">API Key 保存在本机 <code>~/.transx/credentials.json</code>，也可由 <code>DEEPLX_API_KEY</code> 环境变量覆盖。待翻译内容会发送到 DeepLX-compatible 服务，请勿翻译密钥等敏感信息。</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <p>非官方项目 · DeepLX 特供版</p>
+    </footer>
+    <div class="toast" role="status" aria-live="polite">已复制</div>
+  </body>
+</html>

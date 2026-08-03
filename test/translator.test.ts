@@ -31,7 +31,7 @@ test("翻译请求和 AI JSON 所需结果字段稳定", async () => {
   };
   const result = await translate(
     config,
-    { text: "Hello", sourceLang: "auto", targetLang: "zh", format: "html" },
+    { text: "Hello", sourceLang: "auto", targetLang: "zh" },
     fakeFetch,
   );
   assert.equal(requestedUrl, "https://example.invalid/secret%2Fkey/translate");
@@ -39,7 +39,6 @@ test("翻译请求和 AI JSON 所需结果字段稳定", async () => {
     text: "Hello",
     source_lang: "auto",
     target_lang: "ZH",
-    tag_handling: "html",
   });
   assert.deepEqual(result, {
     data: "你好",

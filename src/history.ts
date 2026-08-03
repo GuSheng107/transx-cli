@@ -22,7 +22,7 @@ export interface HistoryRecord {
   createdAt: string;
   sourceLang: string;
   targetLang: string;
-  format: "plain" | "html" | "xml";
+  format: "plain";
   input: string;
   output: string;
 }
@@ -114,7 +114,7 @@ function validateRecord(value: unknown): value is HistoryRecord {
     typeof record.createdAt === "string" &&
     typeof record.sourceLang === "string" &&
     typeof record.targetLang === "string" &&
-    (record.format === "plain" || record.format === "html" || record.format === "xml") &&
+    record.format === "plain" &&
     typeof record.input === "string" &&
     typeof record.output === "string"
   );

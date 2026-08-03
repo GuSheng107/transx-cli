@@ -38,6 +38,20 @@ macOS/Linux：~/.transx/bin/transx
 transx help
 ```
 
+## AI Agent Skill
+
+仓库同时提供 `transx-translate` Skill，支持 Python 脚本、Node.js 脚本或 TransX CLI 三种现有调用方式。三种方式共用 `~/.transx/history/` 翻译历史；脚本仅实现 CLI 已支持的翻译参数，不扩展额外接口。
+
+推荐通过 Skills CLI 全局安装：
+
+```bash
+npx skills add GuSheng107/transx-cli --skill transx-translate -g
+```
+
+首次使用时，Agent 会检测本机环境并让用户选择一种调用方式；之后本地 `SKILL.md` 会精简为对应流程。切换模式只修改 Skill 文档和偏好，不会删除附带脚本或卸载 CLI。
+
+也可以在[文档站 Skills 页面](https://gusheng107.github.io/transx-cli/skills.html)下载 ZIP 手动安装。
+
 ## 配置 API Key
 
 URL 已经内置指向 `api.deeplx.org`，你只需要提供自己的 API Key：
@@ -70,18 +84,11 @@ transx translate "Hello world" --to ZH --json
 echo "Hello world" | transx translate --to ZH --json
 ```
 
-翻译 HTML / XML 片段：
-
-```bash
-transx translate '<p>Hello</p>' --to ZH --format html --json
-```
-
 完整参数：
 
 ```text
 -t, --to <lang>              目标语言（必填）
 -s, --source <lang>          源语言，默认 auto
-    --format <plain|html|xml> 内容格式，默认 plain
     --json                   输出 AI 友好的 JSON
     --timeout <seconds>      本次请求超时
 ```

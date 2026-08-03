@@ -10,7 +10,7 @@ import { promptSecret, promptText, readStdin } from "./input.js";
 import { getLatestVersion, installCurrentPackage, updateFromRegistry } from "./installer.js";
 import { getLanguagesJson, getLanguagesText } from "./languages.js";
 import { getPackageInfo } from "./package-info.js";
-import { translate, type ContentFormat } from "./translator.js";
+import { translate } from "./translator.js";
 import {
   buildInteractiveFrame,
   clearScreen,
@@ -47,7 +47,6 @@ Commands:
 Translate Options:
   -t, --to <lang>              目标语言（必填）
   -s, --source <lang>          源语言（默认 auto）
-      --format <plain|html|xml> 内容格式（默认 plain）
       --json                   输出适合 AI 读取的 JSON
       --timeout <seconds>      本次请求超时
   -h, --help                   显示帮助
@@ -67,7 +66,6 @@ interface TranslateArguments {
   text?: string;
   target?: string;
   source?: string;
-  format?: ContentFormat;
   json: boolean;
   timeoutMs?: number;
 }
@@ -92,9 +90,6 @@ function parseTranslateArguments(args: string[]): TranslateArguments {
       index += 1;
     } else if (arg === "-s" || arg === "--source") {
       parsed.source = requireOptionValue(args, index, arg);
-      index += 1;
-    } else if (arg === "--format") {
-      parsed.format = requireOptionValue(args, index, arg) as ContentFormat;
       index += 1;
     } else if (arg === "--timeout") {
       const seconds = Number(requireOptionValue(args, index, arg));
@@ -161,14 +156,13 @@ async function runTranslate(store: ConfigStore, args: string[]): Promise<void> {
     text,
     targetLang: parsed.target,
     ...(parsed.source ? { sourceLang: parsed.source } : {}),
-    ...(parsed.format ? { format: parsed.format } : {}),
     ...(parsed.timeoutMs ? { timeoutMs: parsed.timeoutMs } : {}),
   });
   try {
     const warning = await new HistoryStore(store.directory).append({
       sourceLang: result.sourceLang,
       targetLang: result.targetLang,
-      format: parsed.format ?? "plain",
+      format: "plain",
       input: text,
       output: result.data,
     });
