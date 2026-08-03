@@ -40,7 +40,7 @@ transx help
 
 ## AI Agent Skill
 
-仓库同时提供 `transx-translate` Skill，支持 Python 脚本、Node.js 脚本或 TransX CLI 三种现有调用方式。三种方式共用 `~/.transx/history/` 翻译历史；脚本仅实现 CLI 已支持的翻译参数，不扩展额外接口。
+仓库提供 `transx-translate` Skill，可选择 Python 脚本、Node.js 脚本或 TransX CLI。仅支持纯文本翻译，三种方式共用 `~/.transx/history/` 翻译历史。
 
 推荐通过 Skills CLI 全局安装：
 

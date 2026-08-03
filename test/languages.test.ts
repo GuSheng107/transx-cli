@@ -7,8 +7,8 @@ import {
   TARGET_LANGUAGES,
 } from "../src/languages.js";
 
-test("语言命令提供经实测筛选的 32 个目标代码", () => {
-  assert.equal(TARGET_LANGUAGES.length, 32);
+test("语言命令提供经实测筛选的 31 个目标代码", () => {
+  assert.equal(TARGET_LANGUAGES.length, 31);
   assert.match(getLanguagesText(), /ZH-HANT\s+繁体中文/);
   assert.match(getLanguagesText(), /EN\s+英语/);
   assert.match(getLanguagesText(), /PT\s+葡萄牙语/);
@@ -26,6 +26,6 @@ test("语言命令 JSON 输出适合 AI 读取", () => {
     data: { target_count: number; source_auto: boolean };
   };
   assert.equal(result.ok, true);
-  assert.equal(result.data.target_count, 32);
+  assert.equal(result.data.target_count, 31);
   assert.equal(result.data.source_auto, true);
 });
