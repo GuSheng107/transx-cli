@@ -1,54 +1,8 @@
-const platformCurrent = document.querySelector(".platform-current");
-const platformMenu = document.querySelector(".platform-menu");
-const platformOptions = [...document.querySelectorAll(".platform-menu button")];
-const installCode = document.getElementById("install-code");
 const toast = document.querySelector(".toast");
 const navLinks = [...document.querySelectorAll(".docs-nav a")];
 const docSections = [...document.querySelectorAll(".doc-section[id]")];
 let toastTimer;
 const copyRestoreTimers = new WeakMap();
-
-function detectPlatform() {
-  const platform = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "";
-  if (/Win/i.test(platform)) return "windows";
-  if (/Mac/i.test(platform)) return "macos";
-  if (/Linux/i.test(platform)) return "linux";
-  return "macos";
-}
-
-function setPlatform(name) {
-  if (!platformCurrent) return;
-  const glyphs = { macos: "MAC", windows: "WIN", linux: "LNX" };
-  const labels = { macos: "macOS", windows: "Windows", linux: "Linux" };
-  platformCurrent.querySelector(".platform-icon").textContent = glyphs[name];
-  platformCurrent.querySelector(".platform-label").textContent = labels[name];
-  platformCurrent.dataset.platform = name;
-  platformOptions.forEach((option) => option.setAttribute("aria-selected", String(option.dataset.platform === name)));
-  if (installCode) installCode.textContent = "npx @gushengcode/transx-cli@latest install";
-}
-
-if (platformCurrent && platformMenu) {
-  platformCurrent.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const expanded = platformCurrent.getAttribute("aria-expanded") === "true";
-    platformCurrent.setAttribute("aria-expanded", String(!expanded));
-    platformMenu.classList.toggle("open", !expanded);
-  });
-
-  platformOptions.forEach((option) => {
-    option.addEventListener("click", () => {
-      setPlatform(option.dataset.platform);
-      platformCurrent.setAttribute("aria-expanded", "false");
-      platformMenu.classList.remove("open");
-    });
-  });
-
-  document.addEventListener("click", () => {
-    platformCurrent.setAttribute("aria-expanded", "false");
-    platformMenu.classList.remove("open");
-  });
-  setPlatform(detectPlatform());
-}
 
 function showToast(message) {
   if (!toast) return;

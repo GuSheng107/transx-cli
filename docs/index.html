@@ -11,8 +11,8 @@
     <meta property="og:url" content="https://gusheng107.github.io/transx-cli/" />
     <title>TransX CLI — DeepLX 特供翻译命令</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260803-6" />
-    <script src="./app.js?v=20260803-6" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=20260803-8" />
+    <script src="./app.js?v=20260803-8" defer></script>
   </head>
   <body class="home-page">
     <header class="topbar">
@@ -72,25 +72,18 @@
         </div>
 
         <div class="installer-card">
-          <div class="platform-select">
-            <button type="button" class="platform-current" data-platform="macos" aria-expanded="false" aria-haspopup="listbox">
-              <span class="platform-icon" aria-hidden="true">MAC</span>
-              <span class="platform-label">macOS</span>
-              <span class="platform-arrow" aria-hidden="true">▾</span>
-            </button>
-            <div class="platform-menu" role="listbox" aria-label="选择平台">
-              <button type="button" role="option" data-platform="macos" aria-selected="true"><span class="platform-icon">MAC</span> macOS</button>
-              <button type="button" role="option" data-platform="windows" aria-selected="false"><span class="platform-icon">WIN</span> Windows</button>
-              <button type="button" role="option" data-platform="linux" aria-selected="false"><span class="platform-icon">LNX</span> Linux</button>
-            </div>
+          <div class="install-head">
+            <span class="install-tag">快速安装</span>
+            <span class="install-meta">跨平台 · 需 Node.js &gt; 22</span>
           </div>
           <div class="install-command">
+            <span class="prompt" aria-hidden="true">$</span>
             <code id="install-code">npx @gushengcode/transx-cli@latest install</code>
             <button type="button" class="copy-btn" data-copy="install-code" aria-label="复制安装命令">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
-          <p class="install-hint">要求 Node.js &gt; 22。安装后重新打开终端即可使用。</p>
+          <p class="install-hint">安装完成后重新打开终端即可使用 <code>transx</code> 命令。</p>
         </div>
       </div>
     </main>
