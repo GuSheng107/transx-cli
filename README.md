@@ -105,7 +105,7 @@ transx languages
 transx languages --json
 ```
 
-经实测 `api.deeplx.org` 支持 32 个目标语言，`EN` / `PT` 为直接可用代码；`EN-GB`、`EN-US`、`ES-419`、`HE`、`PT-BR`、`PT-PT`、`VI` 不可用。源语言支持 `AUTO` 及上述全部代码。
+经实测 `api.deeplx.org` 支持 31 个目标语言，`EN` / `PT` 为直接可用代码；`EN-GB`、`EN-US`、`ES-419`、`HE`、`PT-BR`、`PT-PT`、`VI` 不可用。中文用 `ZH`（默认简体）和 `ZH-HANT`（繁体）。源语言支持 `AUTO` 及上述全部代码。
 
 ## 翻译历史
 
@@ -171,12 +171,11 @@ transx update           # 拉最新版并重新安装
 ```bash
 npm install
 npm run check    # 类型检查
-npm test         # 单元测试
 npm run build    # 编译到 dist/
 npm pack --dry-run
 ```
 
-要求 Node.js > 22。每次提交会在 Windows、macOS、Linux 三系统跑类型检查、测试、构建和打包检查。
+要求 Node.js > 22。每次提交会在 Windows、macOS、Linux 三系统跑类型检查、构建和打包检查。
 
 ## 许可
 

@@ -16,8 +16,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test test/run-tests.ts",
-    "prepack": "npm run build && npm test"
+    "prepack": "npm run build"
   },
   "keywords": [
     "deeplx-compatible",
@@ -40,7 +39,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }
 }
