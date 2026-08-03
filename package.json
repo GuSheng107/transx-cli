@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test test/**/*.test.ts",
+    "test": "tsx --test test/run-tests.ts",
     "prepack": "npm run build && npm test"
   },
   "keywords": [
