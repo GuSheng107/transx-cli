@@ -1,6 +1,6 @@
-# TransX CLI — DeepLX 特供版
+# TransX CLI — DLX 翻译工具
 
-一个把 DeepLX 翻译塞进命令行的工具，写给脚本和 AI Agent 用。
+面向终端、脚本和 Agent 的 DLX 翻译工具。
 
 > 感谢 [LINUX DO](https://linux.do/) 社区，没有始皇的福利就没有这个CLI
 
@@ -8,7 +8,7 @@
 
 ## 写在最前
 
-**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 需要用户自己去 linux.do 的 connect 频道获取，本项目不附带密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
+**非官方项目。** 本项目不提供 API Key 或翻译服务。
 
 ## 平台
 
@@ -40,7 +40,7 @@ transx help
 
 ## AI Agent Skill
 
-仓库提供 `transx-translate` Skill，可选择 Python 脚本、Node.js 脚本或 TransX CLI。仅支持纯文本翻译，三种方式共用 `~/.transx/history/` 翻译历史。
+仓库提供 `transx-translate` Skill，可选择 Python 脚本、Node.js 脚本或 TransX CLI。三种方式支持相同的文本与文件翻译，并共用 `~/.transx/history/`。
 
 推荐通过 Skills CLI 全局安装：
 
@@ -50,11 +50,18 @@ npx skills add GuSheng107/transx-cli --skill transx-translate -g
 
 首次使用时，Agent 会检测本机环境并让用户选择一种调用方式；之后本地 `SKILL.md` 会精简为对应流程。切换模式只修改 Skill 文档和偏好，不会删除附带脚本或卸载 CLI。
 
+脚本依赖使用固定版本：
+
+```bash
+python -m pip install -r ./skills/transx-translate/requirements.txt
+npm ci --omit=dev --prefix ./skills/transx-translate
+```
+
 也可以在[文档站 Skills 页面](https://gusheng107.github.io/transx-cli/skills.html)下载 ZIP 手动安装。
 
 ## 配置 API Key
 
-URL 已经内置指向 `api.deeplx.org`，你只需要提供自己的 API Key：
+在 [Linux.do Connect](https://connect.linux.do/) 获取 DLX API Key，然后初始化：
 
 ```bash
 transx init
@@ -65,10 +72,10 @@ Key 是隐藏输入的，保存在 `~/.transx/credentials.json`，源码、npm �
 非交互环境（比如 CI）可以从 stdin 传：
 
 ```bash
-printf '%s' "$DEEPLX_API_KEY" | transx init --key-stdin
+printf '%s' "$DLX_API_KEY" | transx init --key-stdin
 ```
 
-也可以临时用环境变量 `DEEPLX_API_KEY` 覆盖本地配置，不写盘。
+也可以临时用环境变量 `DLX_API_KEY` 覆盖本地配置，不写盘。
 
 ## 翻译
 
@@ -84,11 +91,25 @@ transx translate "Hello world" --to ZH --json
 echo "Hello world" | transx translate --to ZH --json
 ```
 
+翻译文件：
+
+```bash
+transx translate --file ./readme.md --to ZH --json
+transx translate --file ./report.docx --to ZH
+transx translate --file ./paper.pdf --to ZH --timeout 60
+```
+
+支持 `txt`、`md`、`csv`、`log`、`docx`、`xlsx`、`pptx`、`pdf`。译文默认写入源文件目录，文件名为 `<源文件名>_<目标语言>`；PDF 输出 DOCX。无法创建文件时返回文本或 JSON。
+
+单条文本上限 1500 字符。文件上限 20MB、可翻译文本上限 100000 字符、最多 500 次请求。文件按段落、同格式文字或单元格分批请求，并输出进度。
+
 完整参数：
 
 ```text
 -t, --to <lang>              目标语言（必填）
 -s, --source <lang>          源语言，默认 auto
+-f, --file <path>            从文件提取文本翻译（与位置文本互斥）
+-o, --output <path>          指定译文文件路径
     --json                   输出 AI 友好的 JSON
     --timeout <seconds>      本次请求超时
 ```
@@ -96,13 +117,13 @@ echo "Hello world" | transx translate --to ZH --json
 成功输出：
 
 ```json
-{"ok":true,"data":"你好，世界","source_lang":"auto","target_lang":"ZH","provider":"deeplx-compatible"}
+{"ok":true,"data":"你好，世界","source_lang":"auto","target_lang":"ZH","provider":"dlx"}
 ```
 
 失败走 stderr，非零退出码，方便脚本捕获：
 
 ```json
-{"ok":false,"error":{"code":"CONFIG_NOT_INITIALIZED","message":"缺少 DeepLX API Key，请先运行 transx init"}}
+{"ok":false,"error":{"code":"CONFIG_NOT_INITIALIZED","message":"缺少 DLX API Key，请先运行 transx init"}}
 ```
 
 查看支持的语言代码（不需要联网或初始化）：
@@ -112,7 +133,7 @@ transx languages
 transx languages --json
 ```
 
-经实测 `api.deeplx.org` 支持 31 个目标语言，`EN` / `PT` 为直接可用代码；`EN-GB`、`EN-US`、`ES-419`、`HE`、`PT-BR`、`PT-PT`、`VI` 不可用。中文用 `ZH`（默认简体）和 `ZH-HANT`（繁体）。源语言支持 `AUTO` 及上述全部代码。
+DLX 接口支持 31 个目标语言代码。中文使用 `ZH`（简体）或 `ZH-HANT`（繁体）；源语言可使用 `AUTO`。
 
 ## 翻译历史
 
@@ -125,7 +146,7 @@ transx history --from "2026-08-01" --to "2026-08-03"
 transx history --since 7d --json
 ```
 
-搜索原文和译文（任一包含关键词就返回）：
+搜索文本原文/译文或文件记录中的源文件名/译文文件名：
 
 ```bash
 transx history search "环境审查" --json
@@ -148,7 +169,7 @@ transx history clear --all --yes
 transx history help
 ```
 
-历史目录 `~/.transx/history/`，含 `index.json` 和按日期拆分的文件。不限制条数；当最早记录超过 30 天或文件总量超过 100 MB 时，每天最多提醒一次，不会自动删你的记录。
+文件翻译历史只保存源文件和译文文件的路径、文件名，不保存文件正文。历史目录 `~/.transx/history/`，含 `index.json` 和按日期拆分的文件。
 
 ## 配置
 
@@ -174,16 +195,17 @@ transx update           # 拉最新版并重新安装
 
 ## 隐私和安全
 
-- 待翻译内容会发到你配置的 DeepLX-compatible 服务（默认 `api.deeplx.org`），别拿它翻译密码、令牌或不想离开本机的东西。
+- 待翻译内容会发送到 DLX 服务。
 - API Key 存在 `~/.transx/credentials.json`，POSIX 系统文件权限 0600。
 - 不收集任何遥测。
-- URL 与 Key 不会编译进程序。
+- API Key 不会编译进程序。
 
 ## 开发
 
 ```bash
 npm install
 npm run check    # 类型检查
+npm test         # 测试
 npm run build    # 编译到 dist/
 npm pack --dry-run
 ```

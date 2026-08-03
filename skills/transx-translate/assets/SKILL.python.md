@@ -1,30 +1,29 @@
 ---
 name: transx-translate
-description: "Translate plain text by running the bundled Python script against api.deeplx.org. Use whenever an AI agent needs direct DeepLX text translation through the user's configured Python workflow, including stdin, language selection, timeout control, and JSON output."
+description: "Translate text or supported local files through DLX with the bundled Python script. Use for inline text, stdin, txt, md, csv, log, docx, xlsx, pptx, or pdf translation."
 ---
 
-# Translate with the bundled Python script
+# TransX Python script
 
-Use only `scripts/translate.py` for translation. Do not present alternative execution methods unless the user explicitly asks to reconfigure this skill.
-
-The script records successful translations in the same shared `~/.transx/history/` format used by TransX CLI.
-
-## Workflow
-
-1. Resolve `scripts/translate.py` relative to this `SKILL.md`.
-2. Infer the target language from the request. Ask only if it is genuinely ambiguous.
-3. Use `auto` for the source language unless the user specifies it.
-4. Pass long or shell-sensitive content through stdin.
-5. Always add `--json`, parse the returned JSON, and return the translated text.
+Use only `scripts/translate.py`. Add `--json`.
 
 ```text
 python <skill-dir>/scripts/translate.py translate "Hello world" --to ZH --source auto --json
+python <skill-dir>/scripts/translate.py translate --file ./paper.pdf --to ZH --source auto --json
 ```
 
-If configuration is missing, run `python <skill-dir>/scripts/translate.py init` in an interactive terminal.
+Install the fixed PDF dependency when it is missing:
 
-Do not expose the API key. Send only content the user asked to translate. Translation content is sent to `api.deeplx.org`.
+```text
+python -m pip install -r "<skill-dir>/requirements.txt"
+```
 
-If the user explicitly asks to switch modes, read the original backup at `assets/SKILL.original.md`, run `python <skill-dir>/scripts/configure_skill.py reset` to restore it, then follow that original setup. Do not load the backup during normal translation.
+Direct text is limited to 1500 characters. Files are limited to 20MB, 100000 translatable characters, and 500 requests.
 
-Mode switching changes only `SKILL.md` and the saved preference. Never delete bundled scripts or uninstall an existing TransX CLI.
+File translation writes `<name>_<TARGET>.<ext>` beside the source. PDF writes DOCX. Report `output_file`; return `data` only when `fallback` is true. Use `--output` only when the user provides a path.
+
+Run `python <skill-dir>/scripts/translate.py init` when configuration is missing. Get the DLX API Key from https://connect.linux.do/. History is stored in `~/.transx/history/`.
+
+Never expose the API key. Send only requested content to the service.
+
+To switch modes, read `assets/SKILL.original.md`, run `python <skill-dir>/scripts/configure_skill.py reset`, and follow the restored setup. Do not delete scripts or uninstall the CLI.

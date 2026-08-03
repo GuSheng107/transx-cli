@@ -3,7 +3,7 @@ export interface SupportedLanguage {
   name: string;
 }
 
-// deeplx.org 特供版：经实测 api.deeplx.org 支持的 31 个目标语言代码。
+// 经 DLX 接口实测支持的 31 个目标语言代码。
 // EN、PT 为直接可用代码；EN-GB、EN-US、ES-419、HE、PT-BR、PT-PT、VI 不可用，已剔除。
 // ZH 默认简体，ZH-HANT 繁体，不再单独保留 ZH-HANS。
 export const TARGET_LANGUAGES: readonly SupportedLanguage[] = [

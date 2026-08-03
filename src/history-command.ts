@@ -24,7 +24,7 @@ Usage:
 
 时间统一按中国时间解释，记录值不附带时区标记，例如 2026-08-03 18:30:00.123。
 相对时间使用 7d 这类天数格式。
-search 同时搜索原文和译文，任一包含关键词即返回。
+search 搜索文本原文/译文或文件记录的源文件名/译文文件名。
 `;
 
 interface ParsedQuery {
@@ -114,6 +114,14 @@ function parseQueryArgs(args: string[], allowKeyword: boolean): ParsedQuery {
 }
 
 function formatRecord(record: HistoryRecord, index: number): string {
+  if (record.format === "file") {
+    return [
+      `${index}. [${record.createdAt}] ${record.sourceLang} → ${record.targetLang}`,
+      `   源文件：${record.sourceFilePath}`,
+      `   译文文件：${record.outputFilePath ?? "未生成"}`,
+      `   ID：${record.id}`,
+    ].join("\n");
+  }
   return [
     `${index}. [${record.createdAt}] ${record.sourceLang} → ${record.targetLang}`,
     `   原文：${record.input}`,

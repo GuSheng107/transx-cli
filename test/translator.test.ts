@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { ResolvedConfig } from "../src/config.js";
+import { TRANSLATION_TEXT_MAX_CHARS } from "../src/constants.js";
 import { buildEndpoint, translate } from "../src/translator.js";
 
 const config: ResolvedConfig = {
@@ -44,7 +45,7 @@ test("翻译请求和 AI JSON 所需结果字段稳定", async () => {
     data: "你好",
     sourceLang: "auto",
     targetLang: "ZH",
-    provider: "deeplx-compatible",
+    provider: "dlx",
   });
 });
 
@@ -58,4 +59,34 @@ test("无效响应不会被当作成功", async () => {
     translate(config, { text: "Hello", targetLang: "ZH" }, fakeFetch),
     /缺少字符串字段 data/,
   );
+});
+
+test("超过 DLX 单次字符上限时不发送请求", async () => {
+  let called = false;
+  const fakeFetch: typeof fetch = async () => {
+    called = true;
+    return new Response();
+  };
+  await assert.rejects(
+    translate(
+      config,
+      { text: "a".repeat(TRANSLATION_TEXT_MAX_CHARS + 1), targetLang: "ZH" },
+      fakeFetch,
+    ),
+    /分段或分批/,
+  );
+  assert.equal(called, false);
+});
+
+test("HTTP 429 立即返回且不重试", async () => {
+  let calls = 0;
+  const fakeFetch: typeof fetch = async () => {
+    calls += 1;
+    return new Response("rate limited", { status: 429 });
+  };
+  await assert.rejects(
+    translate(config, { text: "Hello", targetLang: "ZH" }, fakeFetch),
+    /HTTP 429/,
+  );
+  assert.equal(calls, 1);
 });

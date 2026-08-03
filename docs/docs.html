@@ -40,8 +40,8 @@
         <a href="#cmd-install"><span>08</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
         <a href="#cmd-version"><span>09</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
         <a href="#cmd-update"><span>10</span><span class="nav-label"><strong>update</strong><small>更新到最新版</small></span></a>
-        <p class="docs-nav-group">AI 调用</p>
-        <a href="#cmd-output"><span>11</span><span class="nav-label"><strong>JSON 与错误码</strong><small>稳定输出契约</small></span></a>
+        <p class="docs-nav-group">输出</p>
+        <a href="#cmd-output"><span>11</span><span class="nav-label"><strong>JSON 与错误码</strong><small>输出格式</small></span></a>
       </aside>
 
       <div class="docs-content">
@@ -49,25 +49,15 @@
           <div class="doc-index">01</div>
           <span class="kicker">INTERACTIVE</span>
           <h1><code>transx</code></h1>
-          <p class="doc-lead">不带子命令时打开交互界面，适合用户直接操作；非交互环境会输出帮助，不会阻塞 AI 或脚本。</p>
+          <p class="doc-lead">打开交互界面，可翻译文本或文件。非交互环境输出帮助。</p>
           <div class="cmd-block command-syntax"><code id="code-start">transx</code><button type="button" class="copy-btn" data-copy="code-start" aria-label="复制 transx 命令">复制</button></div>
-          <div class="terminal-state-grid">
-            <figure>
-              <img src="./terminal-unconfigured.png" alt="TransX CLI 未配置状态" />
-              <figcaption>未配置</figcaption>
-            </figure>
-            <figure>
-              <img src="./terminal-configured.png" alt="TransX CLI 已配置状态" />
-              <figcaption>已配置</figcaption>
-            </figure>
-          </div>
         </article>
 
         <article class="doc-section command-doc" id="cmd-help">
           <div class="doc-index">02</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx help</code></h2>
-          <p class="doc-lead">在终端输出完整指令列表、翻译参数与常用示例。</p>
+          <p class="doc-lead">显示命令、参数和示例。</p>
           <div class="cmd-block command-syntax"><code id="code-help">transx help</code><button type="button" class="copy-btn" data-copy="code-help" aria-label="复制 help 命令">复制</button></div>
           <div class="no-options"><strong>参数</strong><span>无。也可以使用 <code>transx --help</code> 或 <code>transx -h</code>。</span></div>
         </article>
@@ -76,7 +66,7 @@
           <div class="doc-index">03</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx init</code></h2>
-          <p class="doc-lead">首次初始化或替换 API Key。URL 已内置指向 <code>api.deeplx.org</code>，无需手动配置。</p>
+          <p class="doc-lead">设置 DLX API Key。前往 <a href="https://connect.linux.do/">Linux.do Connect</a> 获取。</p>
           <div class="cmd-block command-syntax"><code id="code-init">transx init [--key-stdin]</code><button type="button" class="copy-btn" data-copy="code-init" aria-label="复制 init 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table compact-table">
@@ -85,35 +75,40 @@
           </div>
           <h3 class="sub-h">示例</h3>
           <div class="cmd-block"><code id="example-init">transx init</code><button type="button" class="copy-btn" data-copy="example-init" aria-label="复制 init 示例">复制</button></div>
-          <p class="doc-note">自动化示例：<code>printf '%s' "$DEEPLX_API_KEY" | transx init --key-stdin</code></p>
+          <p class="doc-note">自动化示例：<code>printf '%s' "$DLX_API_KEY" | transx init --key-stdin</code></p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-translate">
           <div class="doc-index">04</div>
-          <span class="kicker">AI CORE COMMAND</span>
+          <span class="kicker">TRANSLATE</span>
           <h2><code>transx translate</code></h2>
-          <p class="doc-lead">翻译命令行文本或 stdin。AI 调用建议固定加 <code>--json</code>，便于稳定解析成功和失败结果。</p>
-          <div class="cmd-block command-syntax"><code id="code-translate">transx translate [text] --to &lt;lang&gt; [options]</code><button type="button" class="copy-btn" data-copy="code-translate" aria-label="复制 translate 命令">复制</button></div>
+          <p class="doc-lead">翻译文本、stdin 或文件。Agent 调用使用 <code>--json</code>。</p>
+          <div class="cmd-block command-syntax"><code id="code-translate">transx translate [text | --file &lt;path&gt;] --to &lt;lang&gt; [options]</code><button type="button" class="copy-btn" data-copy="code-translate" aria-label="复制 translate 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table">
             <div class="opt-row opt-head"><span>参数</span><span>作用</span><span>默认值</span></div>
             <div class="opt-row"><code>[text]</code><span>待翻译文本；省略时从 stdin 读取</span><span class="dim">stdin</span></div>
             <div class="opt-row"><code>-t, --to &lt;lang&gt;</code><span>目标语言，必填，例如 <code>ZH</code>、<code>EN</code></span><span class="dim">—</span></div>
             <div class="opt-row"><code>-s, --source &lt;lang&gt;</code><span>源语言</span><span class="dim">auto</span></div>
-            <div class="opt-row"><code>--json</code><span>输出适合 AI 读取的单行 JSON</span><span class="dim">关闭</span></div>
+            <div class="opt-row"><code>-f, --file &lt;path&gt;</code><span>翻译 txt/md/csv/log/docx/xlsx/pptx/pdf，与位置文本互斥</span><span class="dim">—</span></div>
+            <div class="opt-row"><code>-o, --output &lt;path&gt;</code><span>指定译文文件路径</span><span class="dim">源文件目录</span></div>
+            <div class="opt-row"><code>--json</code><span>输出单行 JSON</span><span class="dim">关闭</span></div>
             <div class="opt-row"><code>--timeout &lt;seconds&gt;</code><span>仅设置本次请求的超时时间，必须为正数</span><span class="dim">20</span></div>
             <div class="opt-row"><code>-h, --help</code><span>显示 CLI 帮助</span><span class="dim">—</span></div>
           </div>
           <h3 class="sub-h">示例</h3>
           <div class="cmd-block"><code id="example-translate">transx translate "Hello world" --to ZH --json</code><button type="button" class="copy-btn" data-copy="example-translate" aria-label="复制 translate 示例">复制</button></div>
           <p class="doc-note">stdin：<code>echo "Hello world" | transx translate --to ZH --json</code></p>
+          <p class="doc-note">文件：<code>transx translate --file ./paper.pdf --to ZH --json</code></p>
+          <p class="doc-note">输出：<code>&lt;源文件名&gt;_&lt;目标语言&gt;</code>；PDF 输出 DOCX。</p>
+          <p class="doc-note">限制：文件 20MB，可翻译文本 100000 字符，最多 500 次请求。</p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-languages">
           <div class="doc-index">05</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx languages</code></h2>
-          <p class="doc-lead">查看可用于 <code>--source</code> 和 <code>--to</code> 的语言代码。无需初始化，也不会发起网络请求。</p>
+          <p class="doc-lead">显示 <code>--source</code> 和 <code>--to</code> 支持的语言代码。</p>
           <div class="cmd-block command-syntax"><code id="code-languages">transx languages [--json]</code><button type="button" class="copy-btn" data-copy="code-languages" aria-label="复制 languages 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table compact-table">
@@ -127,8 +122,8 @@
             <div><strong>源语言</strong><span><code>AUTO</code>，以及全部目标代码</span></div>
           </div>
           <div class="language-codes"><code>AR BG CS DA DE EL EN ES ET FI FR HU ID IT JA KO LT LV NB NL PL PT RO RU SK SL SV TR UK ZH ZH-HANT</code></div>
-          <p class="doc-note">经实测 <code>api.deeplx.org</code> 筛选；<code>EN</code> / <code>PT</code> 为直接可用代码，<code>EN-GB</code>、<code>EN-US</code>、<code>ES-419</code>、<code>HE</code>、<code>PT-BR</code>、<code>PT-PT</code>、<code>VI</code> 不可用。</p>
-          <h3 class="sub-h">AI 示例</h3>
+          <p class="doc-note">DLX 接口支持 31 个目标语言代码。</p>
+          <h3 class="sub-h">JSON 示例</h3>
           <div class="cmd-block"><code id="example-languages">transx languages --json</code><button type="button" class="copy-btn" data-copy="example-languages" aria-label="复制 languages 示例">复制</button></div>
         </article>
 
@@ -136,7 +131,7 @@
           <div class="doc-index">06</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx history</code></h2>
-          <p class="doc-lead">查看、搜索或清理本地翻译历史。成功翻译自动记录原文和译文，不记录 URL 或 API Key。</p>
+          <p class="doc-lead">查看、搜索或清理本地翻译历史。文件记录只保存源文件和译文文件信息。</p>
           <div class="cmd-block command-syntax"><code id="code-history">transx history [list|search|status|clear|help]</code><button type="button" class="copy-btn" data-copy="code-history" aria-label="复制 history 命令">复制</button></div>
 
           <h3 class="sub-h"><code>transx history [list]</code></h3>
@@ -153,7 +148,7 @@
           <div class="cmd-block"><code id="example-history-list">transx history --limit 50 --offset 100 --json</code><button type="button" class="copy-btn" data-copy="example-history-list" aria-label="复制历史查看示例">复制</button></div>
 
           <h3 class="sub-h"><code>transx history search &lt;keyword&gt;</code></h3>
-          <p class="doc-note">不区分英文大小写，同时搜索原文和译文；任一包含关键词就返回，可匹配多条。支持与查看命令相同的 <code>--limit</code>、<code>--offset</code>、时间范围和 <code>--json</code> 参数。</p>
+          <p class="doc-note">不区分英文大小写。文本记录搜索原文和译文，文件记录搜索源文件名和译文文件名。支持与查看命令相同的 <code>--limit</code>、<code>--offset</code>、时间范围和 <code>--json</code> 参数。</p>
           <div class="cmd-block"><code id="example-history-search">transx history search "环境审查" --limit 50 --json</code><button type="button" class="copy-btn" data-copy="example-history-search" aria-label="复制历史搜索示例">复制</button></div>
 
           <h3 class="sub-h"><code>transx history status [--json]</code></h3>
@@ -206,7 +201,7 @@
           </div>
           <h3 class="sub-h">示例</h3>
           <div class="cmd-block"><code id="example-config">transx config set-key --stdin</code><button type="button" class="copy-btn" data-copy="example-config" aria-label="复制 config 示例">复制</button></div>
-          <p class="doc-note">环境变量 <code>DEEPLX_API_KEY</code> 会覆盖本地配置，但不会写入配置文件。</p>
+          <p class="doc-note">环境变量 <code>DLX_API_KEY</code> 会覆盖本地配置，但不会写入配置文件。</p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-install">
@@ -229,7 +224,7 @@
           <div class="doc-index">09</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx version</code></h2>
-          <p class="doc-lead">显示当前版本；需要联网检查 npm Registry 时再添加 <code>--check</code>。</p>
+          <p class="doc-lead">显示当前版本；<code>--check</code> 检查最新版。</p>
           <div class="cmd-block command-syntax"><code id="code-version">transx version [--check]</code><button type="button" class="copy-btn" data-copy="code-version" aria-label="复制 version 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table compact-table">
@@ -242,16 +237,16 @@
           <div class="doc-index">10</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx update</code></h2>
-          <p class="doc-lead">从 npm Registry 获取最新版并更新用户目录中的 TransX CLI。</p>
+          <p class="doc-lead">更新 TransX CLI。</p>
           <div class="cmd-block command-syntax"><code id="code-update">transx update</code><button type="button" class="copy-btn" data-copy="code-update" aria-label="复制 update 命令">复制</button></div>
           <div class="no-options"><strong>参数</strong><span>无。执行前可先运行 <code>transx version --check</code>。</span></div>
         </article>
 
         <article class="doc-section command-doc" id="cmd-output">
           <div class="doc-index">11</div>
-          <span class="kicker">AI CONTRACT</span>
+          <span class="kicker">OUTPUT</span>
           <h2>JSON 与错误码</h2>
-          <p class="doc-lead">仅 <code>translate --json</code> 使用以下稳定契约：成功写入 stdout，失败写入 stderr，并返回非零退出码。</p>
+          <p class="doc-lead"><code>translate --json</code>：成功写入 stdout，失败写入 stderr。</p>
           <div class="output-grid">
             <div class="output-card success-card">
               <div class="output-header"><span>SUCCESS</span><b>EXIT 0</b></div>
@@ -260,7 +255,7 @@
   "data": "你好，世界",
   "source_lang": "auto",
   "target_lang": "ZH",
-  "provider": "deeplx-compatible"
+  "provider": "dlx"
 }</code></pre>
             </div>
             <div class="output-card error-card">
@@ -269,7 +264,7 @@
   "ok": false,
   "error": {
     "code": "CONFIG_NOT_INITIALIZED",
-    "message": "缺少 DeepLX API Key，请先运行 transx init"
+    "message": "缺少 DLX API Key，请先运行 transx init"
   }
 }</code></pre>
             </div>
@@ -281,8 +276,13 @@
             <div class="opt-row"><code>CONFIG_NOT_INITIALIZED</code><span>未初始化配置</span><span class="dim">3</span></div>
             <div class="opt-row"><code>CONFIG_INVALID</code><span>配置无效</span><span class="dim">3</span></div>
             <div class="opt-row"><code>NETWORK_ERROR</code><span>网络或超时</span><span class="dim">4</span></div>
-            <div class="opt-row"><code>API_HTTP_ERROR</code><span>DeepLX 返回错误</span><span class="dim">5</span></div>
+            <div class="opt-row"><code>API_HTTP_ERROR</code><span>DLX 返回错误</span><span class="dim">5</span></div>
             <div class="opt-row"><code>API_RESPONSE_INVALID</code><span>响应格式无效</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>FILE_READ_ERROR</code><span>文件读取失败</span><span class="dim">7</span></div>
+            <div class="opt-row"><code>FILE_DEPENDENCY_MISSING</code><span>文件依赖未安装</span><span class="dim">7</span></div>
+            <div class="opt-row"><code>FILE_FORMAT_UNSUPPORTED</code><span>文件格式不支持</span><span class="dim">7</span></div>
+            <div class="opt-row"><code>FILE_TOO_LARGE</code><span>文件或文本超限</span><span class="dim">7</span></div>
+            <div class="opt-row"><code>FILE_TEXT_EMPTY</code><span>未提取到文本</span><span class="dim">7</span></div>
             <div class="opt-row"><code>HISTORY_ERROR</code><span>历史文件读取、写入或锁定失败</span><span class="dim">7</span></div>
             <div class="opt-row"><code>INSTALL_ERROR</code><span>安装失败</span><span class="dim">5</span></div>
             <div class="opt-row"><code>UPDATE_ERROR</code><span>更新失败</span><span class="dim">5</span></div>
@@ -294,7 +294,7 @@
 
     <footer class="site-footer">
       <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
-      <p>DeepLX 特供版</p>
+      <p>DLX 翻译</p>
     </footer>
     <div class="toast" role="status" aria-live="polite">已复制</div>
   </body>

@@ -1,4 +1,5 @@
 import { stdin, stderr } from "node:process";
+import { emitKeypressEvents } from "node:readline";
 import { createInterface } from "node:readline/promises";
 
 import { TransxError } from "./errors.js";
@@ -18,6 +19,35 @@ export async function promptText(prompt: string): Promise<string> {
   } finally {
     readline.close();
   }
+}
+
+export async function promptTranslationContinue(): Promise<boolean> {
+  if (!stdin.isTTY || typeof stdin.setRawMode !== "function") return false;
+  stderr.write("\nEnter 继续翻译 · Esc 返回主菜单");
+  emitKeypressEvents(stdin);
+  stdin.setRawMode(true);
+  stdin.resume();
+  return await new Promise<boolean>((resolve, reject) => {
+    const cleanup = (): void => {
+      stdin.removeListener("keypress", onKeypress);
+      stdin.setRawMode(false);
+      stdin.pause();
+      stderr.write("\n");
+    };
+    const onKeypress = (_input: string, key: { name?: string; ctrl?: boolean }): void => {
+      if (key.ctrl && key.name === "c") {
+        cleanup();
+        reject(new TransxError("CANCELLED", "操作已取消", 130));
+      } else if (key.name === "escape") {
+        cleanup();
+        resolve(false);
+      } else if (key.name === "return" || key.name === "enter") {
+        cleanup();
+        resolve(true);
+      }
+    };
+    stdin.on("keypress", onKeypress);
+  });
 }
 
 export async function promptSecret(prompt: string): Promise<string> {

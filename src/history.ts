@@ -17,15 +17,31 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const CHINA_OFFSET_MS = 8 * 60 * 60 * 1000;
 const DAILY_FILE_PATTERN = /^\d{4}-\d{2}-\d{2}\.json$/;
 
-export interface HistoryRecord {
+interface HistoryRecordBase {
   id: string;
   createdAt: string;
   sourceLang: string;
   targetLang: string;
+}
+
+export interface TextHistoryRecord extends HistoryRecordBase {
   format: "plain";
   input: string;
   output: string;
 }
+
+export interface FileHistoryRecord extends HistoryRecordBase {
+  format: "file";
+  sourceFilePath: string;
+  sourceFileName: string;
+  outputFilePath: string | null;
+  outputFileName: string | null;
+}
+
+export type HistoryRecord = TextHistoryRecord | FileHistoryRecord;
+type HistoryAppendInput =
+  | (Omit<TextHistoryRecord, "id" | "createdAt"> & { createdAt?: string })
+  | (Omit<FileHistoryRecord, "id" | "createdAt"> & { createdAt?: string });
 
 interface DailyHistoryFile {
   version: number;
@@ -84,7 +100,7 @@ interface HistoryStoreOptions {
 }
 
 function isNodeError(error: unknown, code: string): boolean {
-  return (error as NodeJS.ErrnoException)?.code === code;
+  return typeof error === "object" && error !== null && "code" in error && error.code === code;
 }
 
 function delay(milliseconds: number): Promise<void> {
@@ -107,17 +123,54 @@ function parseChinaTimestamp(value: string): Date {
 }
 
 function validateRecord(value: unknown): value is HistoryRecord {
-  if (!value || typeof value !== "object") return false;
-  const record = value as Partial<HistoryRecord>;
-  return (
-    typeof record.id === "string" &&
-    typeof record.createdAt === "string" &&
-    typeof record.sourceLang === "string" &&
-    typeof record.targetLang === "string" &&
-    record.format === "plain" &&
-    typeof record.input === "string" &&
-    typeof record.output === "string"
-  );
+  if (typeof value !== "object" || value === null) return false;
+  if (!("id" in value) || typeof value.id !== "string") return false;
+  if (!("createdAt" in value) || typeof value.createdAt !== "string") return false;
+  if (!("sourceLang" in value) || typeof value.sourceLang !== "string") return false;
+  if (!("targetLang" in value) || typeof value.targetLang !== "string") return false;
+  if (!("format" in value)) return false;
+  if (value.format === "plain") {
+    return "input" in value && typeof value.input === "string" &&
+      "output" in value && typeof value.output === "string";
+  }
+  if (value.format === "file") {
+    return "sourceFilePath" in value && typeof value.sourceFilePath === "string" &&
+      "sourceFileName" in value && typeof value.sourceFileName === "string" &&
+      "outputFilePath" in value && (typeof value.outputFilePath === "string" || value.outputFilePath === null) &&
+      "outputFileName" in value && (typeof value.outputFileName === "string" || value.outputFileName === null);
+  }
+  return false;
+}
+
+function matchesKeyword(record: HistoryRecord, keyword: string): boolean {
+  if (record.format === "plain") {
+    return record.input.toLocaleLowerCase().includes(keyword) ||
+      record.output.toLocaleLowerCase().includes(keyword);
+  }
+  return record.sourceFileName.toLocaleLowerCase().includes(keyword) ||
+    Boolean(record.outputFileName?.toLocaleLowerCase().includes(keyword));
+}
+
+function isDailyHistoryFile(value: unknown, date: string): value is DailyHistoryFile {
+  return typeof value === "object" && value !== null &&
+    "version" in value && value.version === HISTORY_VERSION &&
+    "date" in value && value.date === date &&
+    "records" in value && Array.isArray(value.records) && value.records.every(validateRecord);
+}
+
+function isNullableString(value: unknown): value is string | null {
+  return typeof value === "string" || value === null;
+}
+
+function isHistoryIndex(value: unknown): value is HistoryIndex {
+  return typeof value === "object" && value !== null &&
+    "version" in value && value.version === HISTORY_VERSION &&
+    "updatedAt" in value && typeof value.updatedAt === "string" &&
+    "totalRecords" in value && typeof value.totalRecords === "number" &&
+    "totalBytes" in value && typeof value.totalBytes === "number" &&
+    "oldestAt" in value && isNullableString(value.oldestAt) &&
+    "newestAt" in value && isNullableString(value.newestAt) &&
+    "lastWarningAt" in value && isNullableString(value.lastWarningAt);
 }
 
 export class HistoryStore {
@@ -137,22 +190,29 @@ export class HistoryStore {
     this.now = options.now ?? (() => new Date());
   }
 
-  async append(input: Omit<HistoryRecord, "id" | "createdAt"> & { createdAt?: string }): Promise<string | null> {
+  async append(input: HistoryAppendInput): Promise<string | null> {
     return await this.withLock(async () => {
       const createdAt = input.createdAt ?? toChinaTimestamp(this.now());
       const timestamp = parseChinaTimestamp(createdAt);
       if (Number.isNaN(timestamp.getTime())) {
         throw new TransxError("HISTORY_ERROR", "历史记录时间无效", 7);
       }
-      const record: HistoryRecord = {
+      const base = {
         id: randomUUID(),
         createdAt: toChinaTimestamp(timestamp),
         sourceLang: input.sourceLang,
         targetLang: input.targetLang,
-        format: input.format,
-        input: input.input,
-        output: input.output,
       };
+      const record: HistoryRecord = input.format === "plain"
+        ? { ...base, format: "plain", input: input.input, output: input.output }
+        : {
+            ...base,
+            format: "file",
+            sourceFilePath: input.sourceFilePath,
+            sourceFileName: input.sourceFileName,
+            outputFilePath: input.outputFilePath,
+            outputFileName: input.outputFileName,
+          };
       const date = record.createdAt.slice(0, 10);
       const filePath = path.join(this.directory, `${date}.json`);
       const existing = await this.readDailyFile(filePath, date);
@@ -196,8 +256,7 @@ export class HistoryStore {
       .filter(
         (record) =>
           !keyword ||
-          record.input.toLocaleLowerCase().includes(keyword) ||
-          record.output.toLocaleLowerCase().includes(keyword),
+          matchesKeyword(record, keyword),
       )
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
     return {
@@ -290,16 +349,11 @@ export class HistoryStore {
   ): Promise<{ data: DailyHistoryFile; bytes: number }> {
     try {
       const raw = await readFile(filePath, "utf8");
-      const parsed = JSON.parse(raw) as Partial<DailyHistoryFile>;
-      if (
-        parsed.version !== HISTORY_VERSION ||
-        parsed.date !== date ||
-        !Array.isArray(parsed.records) ||
-        !parsed.records.every(validateRecord)
-      ) {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isDailyHistoryFile(parsed, date)) {
         throw new Error("invalid history file schema");
       }
-      return { data: parsed as DailyHistoryFile, bytes: Buffer.byteLength(raw) };
+      return { data: parsed, bytes: Buffer.byteLength(raw) };
     } catch (error) {
       if (isNodeError(error, "ENOENT")) {
         return { data: { version: HISTORY_VERSION, date, records: [] }, bytes: 0 };
@@ -312,15 +366,8 @@ export class HistoryStore {
 
   private async readIndex(): Promise<HistoryIndex | null> {
     try {
-      const parsed = JSON.parse(await readFile(this.indexPath, "utf8")) as Partial<HistoryIndex>;
-      if (
-        parsed.version !== HISTORY_VERSION ||
-        typeof parsed.totalRecords !== "number" ||
-        typeof parsed.totalBytes !== "number"
-      ) {
-        return null;
-      }
-      return parsed as HistoryIndex;
+      const parsed: unknown = JSON.parse(await readFile(this.indexPath, "utf8"));
+      return isHistoryIndex(parsed) ? parsed : null;
     } catch (error) {
       if (isNodeError(error, "ENOENT") || error instanceof SyntaxError) return null;
       throw new TransxError("HISTORY_ERROR", "无法读取翻译历史索引", 7, { cause: error });

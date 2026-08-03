@@ -8,7 +8,13 @@ export type ErrorCode =
   | "INSTALL_ERROR"
   | "UPDATE_ERROR"
   | "HISTORY_ERROR"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "FILE_READ_ERROR"
+  | "FILE_FORMAT_UNSUPPORTED"
+  | "FILE_TOO_LARGE"
+  | "FILE_TEXT_EMPTY"
+  | "FILE_DEPENDENCY_MISSING"
+  | "FILE_WRITE_ERROR";
 
 export class TransxError extends Error {
   readonly code: ErrorCode;

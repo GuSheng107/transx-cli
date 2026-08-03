@@ -30,5 +30,5 @@ test("未初始化时只显示安全可用的菜单项", () => {
 
 test("初始化后开放翻译和配置菜单", () => {
   const actions = getInteractiveMenuItems(true).map((item) => item.value);
-  assert.deepEqual(actions, ["translate", "init", "config", "update", "help", "exit"]);
+  assert.deepEqual(actions, ["translate", "translate_file", "init", "config", "update", "help", "exit"]);
 });

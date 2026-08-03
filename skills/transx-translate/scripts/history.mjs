@@ -81,7 +81,7 @@ async function rebuildIndex(updatedAt, lastWarningAt) {
   };
 }
 
-export async function appendHistory({ sourceLang, targetLang, input, output }) {
+export async function appendHistory(recordInput) {
   const lock = await acquireLock();
   try {
     const createdAt = chinaTimestamp();
@@ -98,11 +98,17 @@ export async function appendHistory({ sourceLang, targetLang, input, output }) {
     daily.records.push({
       id: randomUUID(),
       createdAt,
-      sourceLang,
-      targetLang,
-      format: "plain",
-      input,
-      output,
+      sourceLang: recordInput.sourceLang,
+      targetLang: recordInput.targetLang,
+      ...(recordInput.format === "file"
+        ? {
+            format: "file",
+            sourceFilePath: recordInput.sourceFilePath,
+            sourceFileName: recordInput.sourceFileName,
+            outputFilePath: recordInput.outputFilePath,
+            outputFileName: recordInput.outputFileName,
+          }
+        : { format: "plain", input: recordInput.input, output: recordInput.output }),
     });
     await writeJsonAtomic(dailyPath, daily);
     const indexPath = path.join(historyDirectory, "index.json");

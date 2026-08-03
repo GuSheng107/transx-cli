@@ -1,53 +1,48 @@
 ---
 name: transx-translate
-description: "Translate plain text through the DeepLX-compatible api.deeplx.org service. Use when an AI agent needs text translation through one locally selected workflow: the recommended bundled Python script, the bundled Node.js script, or an installed TransX CLI. On first use, inspect the runtime environment, ask the user to choose once, configure the API key, persist the choice, and rewrite this skill to keep only the selected workflow."
+description: "Translate text or supported local files through DLX using one saved workflow: Python script, Node.js script, or TransX CLI. On first use, detect runtimes, ask once, install the selected workflow dependencies, configure the API key, and replace this file with the selected workflow."
 ---
 
 # TransX Translate
 
-## First-use setup
+## First use
 
-Resolve this skill directory from the current `SKILL.md`. Never print, log, or put an API key in a command argument.
+Resolve `<skill-dir>` from this file. Never expose the API key.
+Get the DLX API Key from https://connect.linux.do/.
 
-1. Detect Python 3, Node.js, `npx`, and `transx`, including the Node.js version.
-2. Read `~/.transx/skill-preference.json` if it exists. If it contains a valid saved choice, run the matching configurator without asking again, re-read the replaced `SKILL.md`, and continue the translation.
-3. If neither Python 3 nor Node.js is available, recommend installing Python 3. After it is installed, configure the Python script workflow directly.
-4. Otherwise report the detected environment and ask the user to choose once among:
-   - Python script — recommended; requires Python 3.
-   - Node.js script — requires Node.js 18 or newer.
-   - TransX CLI — requires Node.js greater than 22 and installs the CLI package.
-5. Do not make a second runtime-choice prompt after the user selects one of the three options.
+1. Detect Python 3, Node.js, `npx`, and `transx`; record the Node.js version.
+2. Reuse a valid choice from `~/.transx/skill-preference.json`.
+3. If neither Python nor Node.js exists, ask the user to install Python 3 and then select Python.
+4. Otherwise ask once: Python script (recommended), Node.js script, or TransX CLI.
 
-Both script workflows write the same `~/.transx/history/` format as TransX CLI. All three workflows share one translation history.
+### Python script
 
-## Configure Python script
+```text
+python -m pip install -r "<skill-dir>/requirements.txt"
+python <skill-dir>/scripts/translate.py init
+python <skill-dir>/scripts/configure_skill.py script
+```
 
-1. If Python 3 is unavailable, tell the user to install it and resume afterward.
-2. Run `python <skill-dir>/scripts/translate.py init` in an interactive terminal.
-3. Run `python <skill-dir>/scripts/configure_skill.py script`.
-4. Re-read the replaced `SKILL.md` and complete the current translation.
+### Node.js script
 
-## Configure Node.js script
+Requires Node.js 18 or newer.
 
-1. If Node.js 18 or newer is unavailable, tell the user to install it and resume afterward.
-2. Run `node <skill-dir>/scripts/translate.mjs init` in an interactive terminal.
-3. Run `node <skill-dir>/scripts/configure-skill.mjs script`.
-4. Re-read the replaced `SKILL.md` and complete the current translation.
+```text
+npm ci --omit=dev --prefix "<skill-dir>"
+node <skill-dir>/scripts/translate.mjs init
+node <skill-dir>/scripts/configure-skill.mjs script
+```
 
-## Configure TransX CLI
+### TransX CLI
 
-1. Require Node.js greater than 22 and `npx`. If either requirement is missing, tell the user to install or upgrade Node.js and resume afterward.
-2. If `transx` is unavailable, install it with `npx @gushengcode/transx-cli@latest install`.
-3. Run `transx init` in an interactive terminal.
-4. Run `node <skill-dir>/scripts/configure-skill.mjs cli`.
-5. Re-read the replaced `SKILL.md` and complete the current translation.
+Requires Node.js greater than 22 and `npx`.
 
-The init commands store credentials in `~/.transx/credentials.json`. `DEEPLX_API_KEY` overrides that file.
+```text
+npx @gushengcode/transx-cli@latest install
+transx init
+node <skill-dir>/scripts/configure-skill.mjs cli
+```
 
-Changing modes only replaces the local `SKILL.md` and updates `~/.transx/skill-preference.json`. Never delete bundled scripts or uninstall an existing TransX CLI during configuration or mode switching.
+Re-read the replaced `SKILL.md` and continue the translation.
 
-## Safety
-
-- Send only content the user asked to translate.
-- Explain that translation content is sent to the configured DeepLX-compatible service when this matters.
-- Do not claim affiliation with DeepL SE, DeepLX, or the service operator.
+All modes use `~/.transx/credentials.json` and `~/.transx/history/`. Changing modes only replaces `SKILL.md` and the preference file.

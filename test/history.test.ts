@@ -6,6 +6,25 @@ import test from "node:test";
 
 import { HistoryStore } from "../src/history.js";
 
+interface DailyHistoryFixture {
+  records: Array<{ createdAt: string; input: string; output: string }>;
+}
+
+function isDailyHistoryFixture(value: unknown): value is DailyHistoryFixture {
+  if (typeof value !== "object" || value === null || !("records" in value)) return false;
+  const records = value.records;
+  return Array.isArray(records) && records.every((record: unknown) => (
+    typeof record === "object"
+    && record !== null
+    && "createdAt" in record
+    && typeof record.createdAt === "string"
+    && "input" in record
+    && typeof record.input === "string"
+    && "output" in record
+    && typeof record.output === "string"
+  ));
+}
+
 async function withHistoryStore(
   run: (store: HistoryStore, directory: string) => Promise<void>,
   options: ConstructorParameters<typeof HistoryStore>[1] = {},
@@ -29,9 +48,8 @@ test("历史按中国时间日期写入标准 JSON 文件且不带时区标记",
       output: "你好",
     });
     const dailyPath = path.join(directory, "history", "2026-08-02.json");
-    const daily = JSON.parse(await readFile(dailyPath, "utf8")) as {
-      records: Array<{ createdAt: string; input: string; output: string }>;
-    };
+    const daily: unknown = JSON.parse(await readFile(dailyPath, "utf8"));
+    assert.ok(isDailyHistoryFixture(daily));
     assert.equal(daily.records[0]?.createdAt, "2026-08-02 00:30:00.000");
     assert.doesNotMatch(daily.records[0]?.createdAt ?? "", /Z|\+08:00|CST/);
     assert.equal(daily.records[0]?.input, "Hello");
@@ -91,6 +109,35 @@ test("关键词同时搜索原文和译文并返回多条记录", async () => {
     assert.equal(chinese.total, 2);
     const english = await store.query({ keyword: "REVIEW", limit: 20 });
     assert.equal(english.total, 2);
+  });
+});
+
+test("文件历史只保存路径和文件名并支持搜索与清理", async () => {
+  await withHistoryStore(async (store) => {
+    await store.append({
+      createdAt: "2026-08-01T01:00:00+08:00",
+      sourceLang: "EN",
+      targetLang: "ZH",
+      format: "file",
+      sourceFilePath: "C:\\papers\\research-paper.docx",
+      sourceFileName: "research-paper.docx",
+      outputFilePath: "C:\\papers\\research-paper_ZH.docx",
+      outputFileName: "research-paper_ZH.docx",
+    });
+    const sourceMatch = await store.query({ keyword: "RESEARCH-PAPER", limit: 20 });
+    const outputMatch = await store.query({ keyword: "_zh.docx", limit: 20 });
+    assert.equal(sourceMatch.total, 1);
+    assert.equal(outputMatch.total, 1);
+    const record = sourceMatch.records[0];
+    assert.equal(record?.format, "file");
+    if (record?.format === "file") {
+      assert.equal(record.sourceFileName, "research-paper.docx");
+      assert.equal(record.outputFileName, "research-paper_ZH.docx");
+      assert.equal("input" in record, false);
+      assert.equal("output" in record, false);
+    }
+    assert.equal(await store.clear({ kind: "all" }), 1);
+    assert.equal((await store.query({ limit: 20 })).total, 0);
   });
 });
 

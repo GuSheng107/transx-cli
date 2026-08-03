@@ -83,8 +83,11 @@ def rebuild_index(updated_at: str, last_warning_at: str | None) -> dict[str, obj
 def append_history(
     source_lang: str,
     target_lang: str,
-    input_text: str,
-    output_text: str,
+    input_text: str | None = None,
+    output_text: str | None = None,
+    *,
+    source_file_path: str | None = None,
+    output_file_path: str | None = None,
 ) -> None:
     lock_fd = acquire_lock()
     try:
@@ -97,17 +100,33 @@ def append_history(
                 raise RuntimeError(f"翻译历史文件无效：{daily_path.name}")
         else:
             daily = {"version": 1, "date": date, "records": []}
-        daily["records"].append(
-            {
-                "id": str(uuid.uuid4()),
-                "createdAt": created_at,
-                "sourceLang": source_lang,
-                "targetLang": target_lang,
-                "format": "plain",
-                "input": input_text,
-                "output": output_text,
-            }
-        )
+        record: dict[str, object] = {
+            "id": str(uuid.uuid4()),
+            "createdAt": created_at,
+            "sourceLang": source_lang,
+            "targetLang": target_lang,
+        }
+        if source_file_path is not None:
+            source_path = Path(source_file_path)
+            output_path = Path(output_file_path) if output_file_path else None
+            record.update(
+                {
+                    "format": "file",
+                    "sourceFilePath": str(source_path),
+                    "sourceFileName": source_path.name,
+                    "outputFilePath": str(output_path) if output_path else None,
+                    "outputFileName": output_path.name if output_path else None,
+                }
+            )
+        else:
+            record.update(
+                {
+                    "format": "plain",
+                    "input": input_text or "",
+                    "output": output_text or "",
+                }
+            )
+        daily["records"].append(record)
         write_json_atomic(daily_path, daily)
         index_path = HISTORY_DIR / "index.json"
         last_warning_at = None

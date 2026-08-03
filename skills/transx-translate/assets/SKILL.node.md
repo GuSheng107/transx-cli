@@ -1,30 +1,29 @@
 ---
 name: transx-translate
-description: "Translate plain text by running the bundled Node.js script against api.deeplx.org. Use whenever an AI agent needs direct DeepLX text translation through the user's configured Node.js workflow, including stdin, language selection, timeout control, and JSON output."
+description: "Translate text or supported local files through DLX with the bundled Node.js script. Use for inline text, stdin, txt, md, csv, log, docx, xlsx, pptx, or pdf translation."
 ---
 
-# Translate with the bundled Node.js script
+# TransX Node.js script
 
-Use only `scripts/translate.mjs` for translation. Do not present alternative execution methods unless the user explicitly asks to reconfigure this skill.
-
-The script records successful translations in the same shared `~/.transx/history/` format used by TransX CLI.
-
-## Workflow
-
-1. Resolve `scripts/translate.mjs` relative to this `SKILL.md`.
-2. Infer the target language from the request. Ask only if it is genuinely ambiguous.
-3. Use `auto` for the source language unless the user specifies it.
-4. Pass long or shell-sensitive content through stdin.
-5. Always add `--json`, parse the returned JSON, and return the translated text.
+Use only `scripts/translate.mjs`. Add `--json`.
 
 ```text
 node <skill-dir>/scripts/translate.mjs translate "Hello world" --to ZH --source auto --json
+node <skill-dir>/scripts/translate.mjs translate --file ./paper.pdf --to ZH --source auto --json
 ```
 
-If configuration is missing, run `node <skill-dir>/scripts/translate.mjs init` in an interactive terminal.
+Install fixed dependencies when `node_modules` is missing:
 
-Do not expose the API key. Send only content the user asked to translate. Translation content is sent to `api.deeplx.org`.
+```text
+npm ci --omit=dev --prefix "<skill-dir>"
+```
 
-If the user explicitly asks to switch modes, read the original backup at `assets/SKILL.original.md`, run `node <skill-dir>/scripts/configure-skill.mjs reset` to restore it, then follow that original setup. Do not load the backup during normal translation.
+Direct text is limited to 1500 characters. Files are limited to 20MB, 100000 translatable characters, and 500 requests.
 
-Mode switching changes only `SKILL.md` and the saved preference. Never delete bundled scripts or uninstall an existing TransX CLI.
+File translation writes `<name>_<TARGET>.<ext>` beside the source. PDF writes DOCX. Report `output_file`; return `data` only when `fallback` is true. Use `--output` only when the user provides a path.
+
+Run `node <skill-dir>/scripts/translate.mjs init` when configuration is missing. Get the DLX API Key from https://connect.linux.do/. History is stored in `~/.transx/history/`.
+
+Never expose the API key. Send only requested content to the service.
+
+To switch modes, read `assets/SKILL.original.md`, run `node <skill-dir>/scripts/configure-skill.mjs reset`, and follow the restored setup. Do not delete scripts or uninstall the CLI.

@@ -6,7 +6,7 @@ import {
   CONFIG_VERSION,
   DEFAULT_TARGET_LANGUAGE,
   DEFAULT_TIMEOUT_MS,
-  DEEPLX_URL_TEMPLATE,
+  DLX_URL_TEMPLATE,
   ENV_API_KEY,
 } from "./constants.js";
 import { TransxError } from "./errors.js";
@@ -36,13 +36,24 @@ export interface ConfigStatusWithApiKey extends ConfigStatus {
   apiKey: string | null;
 }
 
-async function readJson<T>(filePath: string): Promise<T | null> {
+function errorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) return undefined;
+  return typeof error.code === "string" ? error.code : undefined;
+}
+
+function isStoredCredentials(value: unknown): value is StoredCredentials {
+  return typeof value === "object" && value !== null &&
+    "version" in value && typeof value.version === "number" &&
+    "apiKey" in value && typeof value.apiKey === "string";
+}
+
+async function readCredentials(filePath: string): Promise<StoredCredentials | null> {
   try {
-    return JSON.parse(await readFile(filePath, "utf8")) as T;
+    const parsed: unknown = JSON.parse(await readFile(filePath, "utf8"));
+    if (!isStoredCredentials(parsed)) throw new Error("invalid credentials schema");
+    return parsed;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return null;
-    }
+    if (errorCode(error) === "ENOENT") return null;
     throw new TransxError("CONFIG_INVALID", `无法读取本地配置：${filePath}`, 3, { cause: error });
   }
 }
@@ -93,19 +104,19 @@ export class ConfigStore {
   }
 
   async resolve(env: NodeJS.ProcessEnv = process.env): Promise<ResolvedConfig> {
-    const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
+    const storedCredentials = await readCredentials(this.credentialsPath);
     const apiKey = env[ENV_API_KEY]?.trim() || storedCredentials?.apiKey;
 
     if (!apiKey) {
       throw new TransxError(
         "CONFIG_NOT_INITIALIZED",
-        "缺少 DeepLX API Key，请先运行 transx init",
+        "缺少 DLX API Key，请先运行 transx init。获取：https://connect.linux.do/",
         3,
       );
     }
 
     return {
-      urlTemplate: DEEPLX_URL_TEMPLATE,
+      urlTemplate: DLX_URL_TEMPLATE,
       apiKey,
       defaultTarget: DEFAULT_TARGET_LANGUAGE,
       timeoutMs: DEFAULT_TIMEOUT_MS,
@@ -113,12 +124,12 @@ export class ConfigStore {
   }
 
   async status(env: NodeJS.ProcessEnv = process.env): Promise<ConfigStatus> {
-    const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
+    const storedCredentials = await readCredentials(this.credentialsPath);
     const envKey = env[ENV_API_KEY]?.trim();
     const apiKey = envKey || storedCredentials?.apiKey || null;
     return {
       configDirectory: this.directory,
-      urlTemplate: DEEPLX_URL_TEMPLATE,
+      urlTemplate: DLX_URL_TEMPLATE,
       maskedApiKey: apiKey ? maskApiKey(apiKey) : null,
       initialized: Boolean(apiKey),
       keySource: envKey ? "environment" : storedCredentials?.apiKey ? "local" : null,
@@ -126,12 +137,12 @@ export class ConfigStore {
   }
 
   async statusWithApiKey(env: NodeJS.ProcessEnv = process.env): Promise<ConfigStatusWithApiKey> {
-    const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
+    const storedCredentials = await readCredentials(this.credentialsPath);
     const envKey = env[ENV_API_KEY]?.trim();
     const apiKey = envKey || storedCredentials?.apiKey || null;
     return {
       configDirectory: this.directory,
-      urlTemplate: DEEPLX_URL_TEMPLATE,
+      urlTemplate: DLX_URL_TEMPLATE,
       maskedApiKey: apiKey ? maskApiKey(apiKey) : null,
       apiKey,
       initialized: Boolean(apiKey),

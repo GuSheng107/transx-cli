@@ -21,11 +21,12 @@ test("语言命令提供经实测筛选的 31 个目标代码", () => {
 });
 
 test("语言命令 JSON 输出适合 AI 读取", () => {
-  const result = JSON.parse(getLanguagesJson()) as {
-    ok: boolean;
-    data: { target_count: number; source_auto: boolean };
-  };
-  assert.equal(result.ok, true);
-  assert.equal(result.data.target_count, 31);
-  assert.equal(result.data.source_auto, true);
+  assert.deepEqual(JSON.parse(getLanguagesJson()), {
+    ok: true,
+    data: {
+      source_auto: true,
+      target_count: 31,
+      target_languages: TARGET_LANGUAGES,
+    },
+  });
 });
