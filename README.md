@@ -113,7 +113,7 @@ transx config reset key
 transx config reset all
 ```
 
-`transx config` 只显示脱敏 Key，绝不显示拼接后的完整请求 URL。
+`transx config` 显示 URL 模板和完整 API Key，但不会显示拼接后的完整请求 URL。
 
 ## 版本与更新
 

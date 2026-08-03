@@ -21,7 +21,7 @@ const UNINITIALIZED_MENU_ITEMS: Array<InteractiveMenuItem<InteractiveAction>> = 
 const INITIALIZED_MENU_ITEMS: Array<InteractiveMenuItem<InteractiveAction>> = [
   { value: "translate", label: "翻译文本", description: "输入文本并选择目标语言" },
   { value: "init", label: "重新初始化", description: "同时替换 DeepLX URL 与 API Key" },
-  { value: "config", label: "查看 / 更改配置", description: "查看脱敏配置或维护 URL 与 Key" },
+  { value: "config", label: "查看 / 更改配置", description: "查看完整配置或维护 URL 与 Key" },
   { value: "update", label: "检查版本更新", description: "比较 npm Registry 最新版本" },
   { value: "help", label: "查看帮助", description: "显示所有命令与参数" },
   { value: "exit", label: "退出", description: "结束 TransX CLI" },

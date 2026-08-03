@@ -33,7 +33,7 @@
         <a href="#cmd-init"><span>03</span><span class="nav-label"><strong>init</strong><small>初始化连接配置</small></span></a>
         <a href="#cmd-translate"><span>04</span><span class="nav-label"><strong>translate</strong><small>翻译文本</small></span></a>
         <a href="#cmd-languages"><span>05</span><span class="nav-label"><strong>languages</strong><small>查看支持的语言</small></span></a>
-        <a href="#cmd-config"><span>06</span><span class="nav-label"><strong>config</strong><small>管理 URL 与 Key</small></span></a>
+        <a href="#cmd-config"><span>06</span><span class="nav-label"><strong>config</strong><small>查看和管理配置</small></span></a>
         <p class="docs-nav-group">安装与维护</p>
         <a href="#cmd-install"><span>07</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
         <a href="#cmd-version"><span>08</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
@@ -136,11 +136,11 @@
           <div class="doc-index">06</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx config</code></h2>
-          <p class="doc-lead">查看或分别维护本地 URL、API Key。查看配置时 API Key 始终脱敏。</p>
+          <p class="doc-lead">查看完整 URL 模板和原 API Key，或分别维护本地配置。</p>
           <div class="cmd-block command-syntax"><code id="code-config">transx config [set-url|set-key|reset]</code><button type="button" class="copy-btn" data-copy="code-config" aria-label="复制 config 命令">复制</button></div>
 
           <h3 class="sub-h"><code>transx config</code></h3>
-          <div class="no-options"><strong>参数</strong><span>无。输出初始化状态、脱敏配置以及配置文件路径。</span></div>
+          <div class="no-options"><strong>参数</strong><span>无。输出 URL 模板、完整 API Key、初始化状态和配置文件路径。</span></div>
 
           <h3 class="sub-h"><code>transx config set-url [url]</code></h3>
           <div class="opt-table compact-table">

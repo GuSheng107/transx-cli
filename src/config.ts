@@ -41,6 +41,10 @@ export interface ConfigStatus {
   keySource: "environment" | "local" | null;
 }
 
+export interface ConfigStatusWithApiKey extends ConfigStatus {
+  apiKey: string | null;
+}
+
 async function readJson<T>(filePath: string): Promise<T | null> {
   try {
     return JSON.parse(await readFile(filePath, "utf8")) as T;
@@ -172,5 +176,12 @@ export class ConfigStore {
       urlSource: envUrl ? "environment" : storedConfig?.urlTemplate ? "local" : null,
       keySource: envKey ? "environment" : storedCredentials?.apiKey ? "local" : null,
     };
+  }
+
+  async statusWithApiKey(env: NodeJS.ProcessEnv = process.env): Promise<ConfigStatusWithApiKey> {
+    const status = await this.status(env);
+    const storedCredentials = await readJson<StoredCredentials>(this.credentialsPath);
+    const apiKey = env[ENV_API_KEY]?.trim() || storedCredentials?.apiKey || null;
+    return { ...status, apiKey };
   }
 }

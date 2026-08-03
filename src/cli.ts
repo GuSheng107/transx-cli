@@ -29,7 +29,7 @@ Commands:
   init                         初始化 URL 和 API Key
   translate <text>             翻译文本；未传 text 时读取 stdin
   languages [--json]           查看支持的源语言和目标语言
-  config                       查看脱敏配置和配置路径
+  config                       查看 URL 模板和完整 API Key
   config set-url [url]         设置包含 {key} 的 URL 模板
   config set-key [--stdin]     隐藏输入或从 stdin 设置 API Key
   config reset <url|key|all>   重置 URL、Key 或全部配置
@@ -122,7 +122,7 @@ async function runInit(store: ConfigStore, args: string[]): Promise<void> {
 async function runConfig(store: ConfigStore, args: string[]): Promise<void> {
   const action = args[0];
   if (!action) {
-    stdout.write(`${JSON.stringify(await store.status(), null, 2)}\n`);
+    stdout.write(`${JSON.stringify(await store.statusWithApiKey(), null, 2)}\n`);
     return;
   }
   if (action === "set-url") {
@@ -231,7 +231,7 @@ async function runInteractive(store: ConfigStore): Promise<void> {
         renderInteractivePage(packageInfo.version, status.initialized, items, "初始化 / 修改配置");
         await runInit(store, []);
       } else if (action === "config") {
-        renderInteractivePage(packageInfo.version, status.initialized, items, "当前脱敏配置");
+        renderInteractivePage(packageInfo.version, status.initialized, items, "当前配置");
         await runConfig(store, []);
       } else if (action === "update") {
         renderInteractivePage(packageInfo.version, status.initialized, items, "检查版本更新");

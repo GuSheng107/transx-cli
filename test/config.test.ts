@@ -39,7 +39,7 @@ test("配置和凭据可以分别保存与重置", async () => {
   }
 });
 
-test("环境变量覆盖本地配置且 Key 始终脱敏", async () => {
+test("环境变量覆盖本地配置，状态支持脱敏与完整 Key", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "transx-env-"));
   const store = new ConfigStore(directory);
   try {
@@ -54,6 +54,12 @@ test("环境变量覆盖本地配置且 Key 始终脱敏", async () => {
     assert.equal(status.urlTemplate, "https://env.invalid/{key}/translate");
     assert.equal(status.maskedApiKey, maskApiKey("environment-secret-key"));
     assert.ok(!JSON.stringify(status).includes("environment-secret-key"));
+
+    const revealedStatus = await store.statusWithApiKey({
+      DEEPLX_URL_TEMPLATE: "https://env.invalid/{key}/translate",
+      DEEPLX_API_KEY: "environment-secret-key",
+    });
+    assert.equal(revealedStatus.apiKey, "environment-secret-key");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
