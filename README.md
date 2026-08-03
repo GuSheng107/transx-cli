@@ -135,6 +135,12 @@ transx history clear --from "2026-07-01" --to "2026-07-31" --yes
 transx history clear --all --yes
 ```
 
+查看历史命令自身的帮助：
+
+```bash
+transx history help
+```
+
 历史目录 `~/.transx/history/`，含 `index.json` 和按日期拆分的文件。不限制条数；当最早记录超过 30 天或文件总量超过 100 MB 时，每天最多提醒一次，不会自动删你的记录。
 
 ## 配置
