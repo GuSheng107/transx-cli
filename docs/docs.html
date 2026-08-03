@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#03040a" />
+    <meta name="description" content="TransX CLI 工具文档：指令、参数、JSON 返回契约与快速教程。" />
+    <title>工具文档 — TransX CLI</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body class="docs-page">
+    <header class="topbar">
+      <a class="logo" href="./index.html" aria-label="TransX CLI 首页">
+        <span class="logo-icon">TX</span>
+        <span class="logo-text">TransX</span>
+      </a>
+      <nav class="topnav" aria-label="主导航">
+        <a href="./index.html">CLI</a>
+        <a class="active" href="./docs.html" aria-current="page">工具文档</a>
+        <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main class="docs-layout">
+      <aside class="docs-nav" aria-label="文档目录">
+        <p class="docs-nav-title">TOOL DOCUMENT</p>
+        <a href="#doc-commands" class="active"><span>01</span> 指令列表</a>
+        <a href="#doc-options"><span>02</span> 参数说明</a>
+        <a href="#doc-output"><span>03</span> 返回格式</a>
+        <a href="#doc-tutorial"><span>04</span> 简要教程</a>
+        <div class="docs-boundary">
+          <strong>DEEPLX 特供版</strong>
+          <p>不提供节点、URL 或 API Key。</p>
+        </div>
+      </aside>
+
+      <div class="docs-content">
+        <article class="doc-section" id="doc-commands">
+          <div class="doc-index">01</div>
+          <span class="kicker">COMMANDS</span>
+          <h1>指令列表</h1>
+          <p class="doc-lead">运行 <code>transx help</code> 可随时查看完整帮助。</p>
+
+          <div class="cmd-table" role="table" aria-label="TransX 指令列表">
+            <div class="cmd-row cmd-head" role="row"><span>指令</span><span>用途</span><span>说明</span></div>
+            <div class="cmd-row help-row" role="row"><code>transx help</code><span>显示完整指令与示例</span><span class="tag">入口</span></div>
+            <div class="cmd-row" role="row"><code>transx init</code><span>初始化 URL 模板和 API Key</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx translate &lt;text&gt;</code><span>翻译参数文本或 stdin</span><span class="tag">用户 / AI</span></div>
+            <div class="cmd-row" role="row"><code>transx config</code><span>查看脱敏配置与路径</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx config set-url</code><span>设置 URL 模板</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx config set-key</code><span>隐藏输入新 API Key</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx config reset &lt;url|key|all&gt;</code><span>重置指定配置</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx install [--force]</code><span>安装到用户目录并加入 PATH</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx version [--check]</code><span>显示版本，可检查 npm 最新版</span><span class="tag">用户</span></div>
+            <div class="cmd-row" role="row"><code>transx update</code><span>从 npm Registry 更新到最新版</span><span class="tag">用户</span></div>
+          </div>
+        </article>
+
+        <article class="doc-section" id="doc-options">
+          <div class="doc-index">02</div>
+          <span class="kicker">OPTIONS</span>
+          <h2>参数说明</h2>
+          <p class="doc-lead"><code>translate</code> 子命令支持以下参数。</p>
+
+          <div class="opt-table">
+            <div class="opt-row opt-head"><span>参数</span><span>说明</span><span>默认</span></div>
+            <div class="opt-row"><code>-t, --to &lt;lang&gt;</code><span>目标语言（必填）</span><span class="dim">—</span></div>
+            <div class="opt-row"><code>-s, --source &lt;lang&gt;</code><span>源语言</span><span class="dim">auto</span></div>
+            <div class="opt-row"><code>--format &lt;plain|html|xml&gt;</code><span>内容格式</span><span class="dim">plain</span></div>
+            <div class="opt-row"><code>--json</code><span>输出适合 AI 读取的 JSON</span><span class="dim">关闭</span></div>
+            <div class="opt-row"><code>--timeout &lt;seconds&gt;</code><span>本次请求超时</span><span class="dim">20</span></div>
+            <div class="opt-row"><code>-h, --help</code><span>显示帮助</span><span class="dim">—</span></div>
+          </div>
+
+          <h3 class="sub-h">init 参数</h3>
+          <div class="opt-table compact-table">
+            <div class="opt-row opt-head"><span>参数</span><span>说明</span></div>
+            <div class="opt-row"><code>--url &lt;url&gt;</code><span>非交互式传入 URL 模板</span></div>
+            <div class="opt-row"><code>--key-stdin</code><span>从 stdin 读取 API Key</span></div>
+          </div>
+
+          <h3 class="sub-h">环境变量</h3>
+          <div class="opt-table compact-table">
+            <div class="opt-row opt-head"><span>变量</span><span>说明</span></div>
+            <div class="opt-row"><code>DEEPLX_URL_TEMPLATE</code><span>覆盖本地 URL 模板</span></div>
+            <div class="opt-row"><code>DEEPLX_API_KEY</code><span>覆盖本地 API Key</span></div>
+          </div>
+        </article>
+
+        <article class="doc-section" id="doc-output">
+          <div class="doc-index">03</div>
+          <span class="kicker">OUTPUT</span>
+          <h2>返回格式</h2>
+          <p class="doc-lead">使用 <code>--json</code> 时，成功写入 stdout；失败写入 stderr，并返回非零退出码。</p>
+
+          <div class="output-grid">
+            <div class="output-card success-card">
+              <div class="output-header"><span>SUCCESS</span><b>EXIT 0</b></div>
+              <pre><code>{
+  "ok": true,
+  "data": "你好，世界",
+  "source_lang": "auto",
+  "target_lang": "ZH",
+  "provider": "deeplx-compatible"
+}</code></pre>
+            </div>
+            <div class="output-card error-card">
+              <div class="output-header"><span>ERROR</span><b>EXIT ≠ 0</b></div>
+              <pre><code>{
+  "ok": false,
+  "error": {
+    "code": "CONFIG_NOT_INITIALIZED",
+    "message": "缺少 DeepLX URL 或 API Key"
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <h3 class="sub-h">错误码</h3>
+          <div class="opt-table">
+            <div class="opt-row opt-head"><span>code</span><span>含义</span><span>exit</span></div>
+            <div class="opt-row"><code>INVALID_ARGUMENT</code><span>参数错误</span><span class="dim">2</span></div>
+            <div class="opt-row"><code>CONFIG_NOT_INITIALIZED</code><span>未初始化配置</span><span class="dim">3</span></div>
+            <div class="opt-row"><code>CONFIG_INVALID</code><span>配置无效</span><span class="dim">3</span></div>
+            <div class="opt-row"><code>NETWORK_ERROR</code><span>网络或超时</span><span class="dim">4</span></div>
+            <div class="opt-row"><code>API_HTTP_ERROR</code><span>DeepLX 返回错误</span><span class="dim">5</span></div>
+            <div class="opt-row"><code>API_RESPONSE_INVALID</code><span>响应格式无效</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>INSTALL_ERROR</code><span>安装失败</span><span class="dim">5</span></div>
+            <div class="opt-row"><code>UPDATE_ERROR</code><span>更新失败</span><span class="dim">5</span></div>
+            <div class="opt-row"><code>CANCELLED</code><span>用户取消</span><span class="dim">130</span></div>
+          </div>
+        </article>
+
+        <article class="doc-section" id="doc-tutorial">
+          <div class="doc-index">04</div>
+          <span class="kicker">TUTORIAL</span>
+          <h2>简要教程</h2>
+
+          <div class="tutorial-step">
+            <span class="step-num">01</span><h3>查看帮助</h3>
+            <p>先确认当前版本支持的全部指令。</p>
+            <div class="cmd-block"><code id="tut-help">transx help</code><button type="button" class="copy-btn" data-copy="tut-help" aria-label="复制帮助命令">COPY</button></div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">02</span><h3>安装</h3>
+            <p>安装到用户目录并自动配置 PATH，随后重新打开终端。</p>
+            <div class="cmd-block"><code id="tut-install">npx transx-cli install</code><button type="button" class="copy-btn" data-copy="tut-install" aria-label="复制安装命令">COPY</button></div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">03</span><h3>初始化配置</h3>
+            <p>URL 必须包含 <code>{key}</code> 占位符，API Key 采用隐藏输入。</p>
+            <div class="cmd-block"><code id="tut-init">transx init</code><button type="button" class="copy-btn" data-copy="tut-init" aria-label="复制初始化命令">COPY</button></div>
+            <p class="doc-note">非交互环境：<code>printf '%s' "$DEEPLX_API_KEY" | transx init --url 'https://your-deeplx.example/{key}/translate' --key-stdin</code></p>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">04</span><h3>翻译文本</h3>
+            <p>AI 调用推荐始终使用 <code>--json</code>。</p>
+            <div class="cmd-block"><code id="tut-translate">transx translate "Hello world" --to ZH --json</code><button type="button" class="copy-btn" data-copy="tut-translate" aria-label="复制翻译命令">COPY</button></div>
+            <p class="doc-note">stdin：<code>echo "Hello" | transx translate --to ZH --json</code></p>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">05</span><h3>配置管理</h3>
+            <p>查看脱敏配置，或修改 URL / Key。</p>
+            <div class="cmd-block"><code id="tut-config">transx config</code><button type="button" class="copy-btn" data-copy="tut-config" aria-label="复制配置命令">COPY</button></div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">06</span><h3>版本与更新</h3>
+            <p>检查并更新到 npm 最新版。</p>
+            <div class="cmd-block"><code id="tut-update">transx version --check &amp;&amp; transx update</code><button type="button" class="copy-btn" data-copy="tut-update" aria-label="复制更新命令">COPY</button></div>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <p>DeepLX 特供版 · 非官方 · 用户自带 URL 与 Key</p>
+    </footer>
+    <div class="toast" role="status" aria-live="polite">已复制</div>
+  </body>
+</html>

@@ -3,266 +3,92 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10140f" />
-    <meta
-      name="description"
-      content="TransX CLI 是面向 AI Agent 与自动化脚本的非官方 DeepLX 特供翻译命令行工具。URL 与 API Key 由用户自行提供。"
-    />
-    <meta property="og:title" content="TransX CLI — 把翻译变成一条可靠命令" />
-    <meta
-      property="og:description"
-      content="DeepLX 特供、用户自带 URL 与 Key、Windows/macOS/Linux 可用。"
-    />
+    <meta name="theme-color" content="#03040a" />
+    <meta name="description" content="TransX CLI 是面向 AI Agent 与自动化脚本的非官方 DeepLX 特供翻译命令行工具。" />
+    <meta property="og:title" content="TransX CLI — DeepLX 特供翻译命令" />
+    <meta property="og:description" content="用户自带 DeepLX URL 与 API Key，支持 Windows、macOS 与 Linux。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://gusheng107.github.io/transx-cli/" />
     <title>TransX CLI — DeepLX 特供翻译命令</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
   </head>
-  <body>
-    <a class="skip-link" href="#main">跳到主要内容</a>
-
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="TransX CLI 首页">
-        <span class="brand-mark" aria-hidden="true">TX</span>
-        <span class="brand-name">TRANSX</span>
-        <span class="brand-suffix">/ CLI</span>
+  <body class="home-page">
+    <header class="topbar">
+      <a class="logo" href="./index.html" aria-label="TransX CLI 首页">
+        <span class="logo-icon">TX</span>
+        <span class="logo-text">TransX</span>
       </a>
-      <nav class="top-nav" aria-label="主导航">
-        <a href="#install">安装</a>
-        <a href="#quickstart">快速开始</a>
-        <a href="#commands">指令</a>
-        <a href="#ai-contract">AI 调用</a>
+      <nav class="topnav" aria-label="主导航">
+        <a class="active" href="./index.html" aria-current="page">CLI</a>
+        <a href="./docs.html">工具文档</a>
+        <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
       </nav>
-      <a class="github-link" href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">
-        GitHub <span aria-hidden="true">↗</span>
-      </a>
     </header>
 
-    <main id="main">
-      <section class="hero" id="top">
-        <div class="hero-grid" aria-hidden="true"></div>
-        <div class="signal signal-one" aria-hidden="true"></div>
-        <div class="signal signal-two" aria-hidden="true"></div>
+    <main class="home-main">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="glow glow-left" aria-hidden="true"></div>
+      <div class="glow glow-right" aria-hidden="true"></div>
 
-        <div class="hero-copy">
-          <div class="eyebrow"><span></span> DEEPLX-SPECIFIC · UNOFFICIAL</div>
-          <h1>把翻译变成<br /><em>一条可靠命令。</em></h1>
-          <p>
-            面向 AI Agent 与自动化脚本的 DeepLX 特供 CLI。<br />
-            URL 与 API Key 由你提供、在本机保存。
-          </p>
-          <div class="hero-badges" aria-label="支持信息">
-            <span>NODE.JS &gt; 22</span>
-            <span>WIN / MAC / LINUX</span>
-            <span>NO TELEMETRY</span>
-          </div>
-        </div>
+      <div class="hero-copy">
+        <h1>TransX <em>CLI</em> 服务</h1>
+        <p class="subtitle">在终端调用 DeepLX 翻译服务，让多语言处理更直接。</p>
+      </div>
 
-        <div class="console-wrap" aria-label="TransX CLI 运行示例">
-          <div class="route-label route-source">SOURCE / EN</div>
-          <div class="route-label route-target">TARGET / ZH</div>
-          <div class="console">
-            <div class="console-bar">
-              <div class="console-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-              <span>transx — agent shell</span>
-              <b>READY</b>
-            </div>
-            <div class="console-body">
-              <p class="muted"># 首次使用，保存自己的 DeepLX 配置</p>
-              <p><span class="prompt">›</span> transx init</p>
-              <p class="success">✓ URL 与 API Key 已安全保存</p>
-              <p class="muted terminal-gap"># AI 推荐使用稳定 JSON 输出</p>
-              <p><span class="prompt">›</span> transx translate <span class="string">"Make it clear."</span> --to ZH --json</p>
-              <pre><code>{
-  <span class="key">"ok"</span>: <span class="boolean">true</span>,
-  <span class="key">"data"</span>: <span class="string">"把它说清楚。"</span>,
-  <span class="key">"target_lang"</span>: <span class="string">"ZH"</span>
-}</code></pre>
+      <div class="hero-stage">
+        <div class="laptop" aria-label="终端预览">
+          <div class="laptop-frame">
+            <div class="laptop-screen">
+              <div class="term-bar">
+                <div class="term-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+                <span>TransX CLI v0.1.0</span>
+              </div>
+              <div class="term-body">
+                <p class="term-title">欢迎来到 TransX CLI！</p>
+                <ol class="term-tutorial">
+                  <li>查看帮助：运行 <code>transx help</code> 获取完整指令。</li>
+                  <li>初始化配置：运行 <code>transx init</code>，输入 DeepLX URL 模板与 API Key。</li>
+                  <li>翻译文本：<code>transx translate "Hello" --to ZH --json</code></li>
+                  <li>查看配置：<code>transx config</code></li>
+                  <li>检查更新：<code>transx version --check</code>，升级：<code>transx update</code></li>
+                </ol>
+                <p class="term-prompt"><span class="cursor">_</span></p>
+              </div>
             </div>
           </div>
+          <div class="laptop-base"></div>
         </div>
 
-        <a class="scroll-cue" href="#install">
-          <span>SCROLL TO INSTALL</span><i aria-hidden="true">↓</i>
-        </a>
-      </section>
-
-      <section class="install-band" id="install">
-        <div class="section-index">01</div>
-        <div class="install-heading">
-          <span class="kicker">INSTALL / ONE COMMAND</span>
-          <h2>三端，同一条安装命令。</h2>
-          <p>需要已安装 Node.js &gt; 22。npm 包发布后，命令会安装到当前用户目录并自动配置 PATH。</p>
-        </div>
-        <div class="installer">
-          <div class="os-tabs" role="tablist" aria-label="选择操作系统">
-            <button type="button" role="tab" data-os="windows" aria-selected="true">Windows</button>
-            <button type="button" role="tab" data-os="macos" aria-selected="false">macOS</button>
-            <button type="button" role="tab" data-os="linux" aria-selected="false">Linux</button>
+        <div class="installer-card">
+          <div class="platform-select">
+            <button type="button" class="platform-current" data-platform="macos" aria-expanded="false" aria-haspopup="listbox">
+              <span class="platform-icon" aria-hidden="true">MAC</span>
+              <span class="platform-label">macOS</span>
+              <span class="platform-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="platform-menu" role="listbox" aria-label="选择平台">
+              <button type="button" role="option" data-platform="macos" aria-selected="true"><span class="platform-icon">MAC</span> macOS</button>
+              <button type="button" role="option" data-platform="windows" aria-selected="false"><span class="platform-icon">WIN</span> Windows</button>
+              <button type="button" role="option" data-platform="linux" aria-selected="false"><span class="platform-icon">LNX</span> Linux</button>
+            </div>
           </div>
           <div class="install-command">
-            <span class="command-prefix" aria-hidden="true">›</span>
             <code id="install-code">npx transx-cli install</code>
-            <button class="copy-button" type="button" data-copy-target="install-code" aria-label="复制安装命令">
-              COPY
+            <button type="button" class="copy-btn" data-copy="install-code" aria-label="复制安装命令">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
-          <p class="os-note" id="os-note">安装入口：%LOCALAPPDATA%\.transx\bin\transx.cmd</p>
+          <p class="install-hint">要求 Node.js &gt; 22。安装后重新打开终端即可使用。</p>
         </div>
-      </section>
-
-      <section class="docs-shell" id="quickstart">
-        <aside class="docs-nav" aria-label="文档目录">
-          <p class="docs-nav-title">TOOL DOCUMENT</p>
-          <a href="#quickstart" class="active"><span>02</span> 快速开始</a>
-          <a href="#commands"><span>03</span> 指令参考</a>
-          <a href="#ai-contract"><span>04</span> AI 调用契约</a>
-          <a href="#configuration"><span>05</span> 配置与重置</a>
-          <a href="#storage"><span>06</span> 本地存储</a>
-          <a href="#security"><span>07</span> 安全边界</a>
-          <div class="sidebar-note">
-            <strong>DEEPLX 特供版</strong>
-            <p>不提供翻译服务，不内置接口或密钥。</p>
-          </div>
-        </aside>
-
-        <div class="docs-content">
-          <article class="doc-section quickstart-section">
-            <div class="section-index">02</div>
-            <div class="section-title-row">
-              <div>
-                <span class="kicker">QUICK START / 30 SEC</span>
-                <h2>初始化一次，随后直接翻译。</h2>
-              </div>
-              <span class="status-chip"><i></i> LOCAL CONFIG</span>
-            </div>
-
-            <div class="step-grid">
-              <div class="step-card">
-                <span class="step-number">STEP 01</span>
-                <h3>写入 URL 与 Key</h3>
-                <p>URL 模板必须包含 <code>{key}</code> 占位符。Key 采用隐藏输入。</p>
-                <div class="mini-code"><code id="init-code">transx init</code><button type="button" data-copy-target="init-code">COPY</button></div>
-              </div>
-              <div class="step-card accent-card">
-                <span class="step-number">STEP 02</span>
-                <h3>请求翻译</h3>
-                <p>文本可作为参数传入，也可以通过 stdin 输入。</p>
-                <div class="mini-code"><code id="translate-code">transx translate "Hello" --to ZH --json</code><button type="button" data-copy-target="translate-code">COPY</button></div>
-              </div>
-            </div>
-          </article>
-
-          <article class="doc-section" id="commands">
-            <div class="section-index">03</div>
-            <span class="kicker">COMMAND INDEX</span>
-            <h2>指令保持少而明确。</h2>
-            <p class="section-lead">无兼容别名、无隐式服务。运行 <code>transx help</code> 查看同一份帮助。</p>
-
-            <div class="command-table" role="table" aria-label="TransX 指令列表">
-              <div class="table-row table-head" role="row"><span>指令</span><span>用途</span><span>适用对象</span></div>
-              <div class="table-row" role="row"><code>transx init</code><span>初始化 URL 模板和 API Key</span><b>用户</b></div>
-              <div class="table-row" role="row"><code>transx translate</code><span>翻译参数文本或 stdin</span><b>用户 / AI</b></div>
-              <div class="table-row" role="row"><code>transx config</code><span>查看脱敏配置与路径</span><b>用户</b></div>
-              <div class="table-row" role="row"><code>transx version --check</code><span>检查 npm 最新版本</span><b>用户</b></div>
-              <div class="table-row" role="row"><code>transx update</code><span>更新用户目录中的版本</span><b>用户</b></div>
-            </div>
-
-            <div class="option-strip">
-              <code>--to &lt;lang&gt;</code><span>目标语言，必填</span>
-              <code>--source &lt;lang&gt;</code><span>源语言，默认 auto</span>
-              <code>--format &lt;type&gt;</code><span>plain / html / xml</span>
-              <code>--json</code><span>稳定 JSON 输出</span>
-              <code>--timeout &lt;sec&gt;</code><span>单次请求超时</span>
-            </div>
-          </article>
-
-          <article class="doc-section contract-section" id="ai-contract">
-            <div class="section-index">04</div>
-            <span class="kicker">AI CONTRACT / STDOUT + STDERR</span>
-            <h2>给 AI 的不是界面，是稳定契约。</h2>
-            <p class="section-lead">固定使用 <code>--json</code>。成功内容写入 stdout；失败内容写入 stderr，并返回非零退出码。</p>
-
-            <div class="contract-grid">
-              <div class="contract-card success-contract">
-                <div class="contract-header"><span>SUCCESS</span><b>EXIT 0</b></div>
-                <pre><code>{
-  "ok": true,
-  "data": "你好，世界",
-  "source_lang": "auto",
-  "target_lang": "ZH",
-  "provider": "deeplx-compatible"
-}</code></pre>
-              </div>
-              <div class="contract-card error-contract">
-                <div class="contract-header"><span>ERROR</span><b>EXIT ≠ 0</b></div>
-                <pre><code>{
-  "ok": false,
-  "error": {
-    "code": "CONFIG_NOT_INITIALIZED",
-    "message": "缺少 DeepLX URL 或 API Key"
-  }
-}</code></pre>
-              </div>
-            </div>
-          </article>
-
-          <article class="doc-section" id="configuration">
-            <div class="section-index">05</div>
-            <span class="kicker">CONFIGURATION</span>
-            <h2>URL 和 Key 始终分开。</h2>
-            <div class="config-layout">
-              <div>
-                <p class="section-lead">程序只在发起请求时将 <code>{key}</code> 替换为本地 Key，不展示拼接后的完整 URL。</p>
-                <div class="config-list">
-                  <div><code>transx config set-url</code><span>重设 URL 模板</span></div>
-                  <div><code>transx config set-key</code><span>隐藏输入新 Key</span></div>
-                  <div><code>transx config reset url</code><span>仅清除 URL</span></div>
-                  <div><code>transx config reset key</code><span>仅清除 Key</span></div>
-                  <div><code>transx config reset all</code><span>清除全部配置</span></div>
-                </div>
-              </div>
-              <div class="url-blueprint">
-                <span>URL TEMPLATE</span>
-                <code>https://your-deeplx.example/<mark>{key}</mark>/translate</code>
-                <p>示例域名仅作格式说明，不是可用翻译服务。</p>
-              </div>
-            </div>
-          </article>
-
-          <article class="doc-section" id="storage">
-            <div class="section-index">06</div>
-            <span class="kicker">LOCAL STORAGE MAP</span>
-            <h2>跨端一致，路径可预期。</h2>
-            <div class="path-map">
-              <div><span>WINDOWS ENTRY</span><code>%LOCALAPPDATA%\.transx\bin\transx.cmd</code></div>
-              <div><span>MAC / LINUX ENTRY</span><code>~/.transx/bin/transx</code></div>
-              <div><span>ALL PLATFORMS CONFIG</span><code>~/.transx/</code></div>
-            </div>
-          </article>
-
-          <article class="doc-section security-section" id="security">
-            <div class="section-index">07</div>
-            <span class="kicker">BOUNDARY / READ BEFORE USE</span>
-            <h2>你的接口，也意味着你的判断。</h2>
-            <div class="security-grid">
-              <p><strong>01</strong> URL 与 Key 不编译进源码、npm 包或文档。</p>
-              <p><strong>02</strong> 待翻译内容会发送到你配置的第三方服务。</p>
-              <p><strong>03</strong> 不收集遥测，不提供公共 DeepLX 节点。</p>
-              <p><strong>04</strong> TransX 与 DeepL SE、DeepLX 服务方无隶属或背书关系。</p>
-            </div>
-          </article>
-        </div>
-      </section>
+      </div>
     </main>
 
-    <footer>
-      <div class="footer-brand">TRANSX <span>/ CLI</span></div>
-      <p>DeepLX 特供版 · 非官方开源工具 · 用户自带服务配置</p>
-      <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">SOURCE ON GITHUB ↗</a>
+    <footer class="site-footer">
+      <a href="https://github.com/GuSheng107/transx-cli" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <p>DeepLX 特供版 · 非官方 · 用户自带 URL 与 Key</p>
     </footer>
-
-    <div class="copy-toast" role="status" aria-live="polite">已复制</div>
+    <div class="toast" role="status" aria-live="polite">已复制</div>
   </body>
 </html>
