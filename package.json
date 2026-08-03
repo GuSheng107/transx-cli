@@ -1,0 +1,45 @@
+{
+  "name": "transx-cli",
+  "version": "0.1.0",
+  "description": "Unofficial CLI dedicated to user-provided DeepLX-compatible translation endpoints",
+  "type": "module",
+  "bin": {
+    "transx": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test test/**/*.test.ts",
+    "prepack": "npm run build && npm test"
+  },
+  "keywords": [
+    "deeplx-compatible",
+    "translation",
+    "cli",
+    "ai-agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuSheng107/transx-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GuSheng107/transx-cli/issues"
+  },
+  "homepage": "https://github.com/GuSheng107/transx-cli#readme",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
