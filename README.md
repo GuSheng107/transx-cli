@@ -109,7 +109,7 @@ transx languages --json
 
 ## 翻译历史
 
-每条成功的翻译都会落到本地历史，不记录 URL 和 API Key。历史按中国时间拆分到 `YYYY-MM-DD.json`，时间格式 `YYYY-MM-DD HH:mm:ss.SSS`，不带时区标记。
+每条成功的翻译都会落到本地历史，不记录 URL 和 API Key。历史按中国时间拆分到 `YYYY-MM-DD.json`，时间格式 `YYYY-MM-DD HH:mm:ss.SSS`。
 
 ```bash
 transx history                         # 最近 20 条
