@@ -4,6 +4,8 @@
 
 TransX 是一个面向脚本和 AI Agent 的文本翻译命令行工具。它只处理文本，不读取文件、不启动服务器，也不包含 MCP。
 
+文档站：[gusheng107.github.io/transx-cli](https://gusheng107.github.io/transx-cli/)
+
 支持平台：
 
 - Windows 10/11（PowerShell、CMD、Windows Terminal）
@@ -11,6 +13,8 @@ TransX 是一个面向脚本和 AI Agent 的文本翻译命令行工具。它只
 - Linux（x64/arm64，bash/zsh）
 
 ## 安装
+
+要求 **Node.js > 22**。
 
 推荐通过 npm Registry 安装到用户目录：
 
@@ -122,7 +126,7 @@ npm run build
 npm pack --dry-run
 ```
 
-要求 Node.js 20 或更高版本。
+要求 Node.js > 22。
 
 所有提交均在 Windows、macOS、Linux 三系统上运行类型检查、单元测试、构建和 npm 打包检查。
 
