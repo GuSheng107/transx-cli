@@ -1,14 +1,14 @@
 # TransX CLI — DeepLX 特供版
 
-一个把 DeepLX 翻译塞进命令行的工具，写给脚本和 AI Agent 用。只翻译文本，不读文件、不起服务、不带 MCP。
+一个把 DeepLX 翻译塞进命令行的工具，写给脚本和 AI Agent 用。
 
-> 感谢 [LINUX DO](https://linux.do/) 社区的佬友们，最早的反馈和 Star 都来自那里。如果你也是社区成员，欢迎来帖子里聊聊。
+> 感谢 [LINUX DO](https://linux.do/) 社区，没有始皇的福利就没有这个CLI
 
 文档站：https://gusheng107.github.io/transx-cli/
 
-## 先说清楚
+## 写在最前
 
-**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 由用户自己申请并保存，本项目不附带任何公共接口、密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
+**非官方项目。** TransX CLI 默认连接 `api.deeplx.org`，但 API Key 由用户自己去linux.do的connect获取，本项目不附带密钥或翻译服务，与 DeepL SE 及任何 DeepLX/DLX 服务运营者均无隶属、授权或背书关系。请确保你有权使用所配置的服务。
 
 ## 平台
 
