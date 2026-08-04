@@ -11,18 +11,23 @@ import { getPackageInfo } from "./package-info.js";
 
 const execFileAsync = promisify(execFile);
 
-export async function runNpm(args: string[]): Promise<{ stdout: string; stderr: string }> {
+export async function runNpm(
+  args: string[],
+  options: { timeout?: number } = {},
+): Promise<{ stdout: string; stderr: string }> {
   const npmExecPath = process.env.npm_execpath;
+  const execOptions = {
+    windowsHide: true,
+    ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
+    // Windows 不能直接执行 .cmd；不在 npm/npx 进程内时通过命令解释器启动。
+    ...(process.platform === "win32" ? { shell: true } : {}),
+  };
   if (process.platform === "win32" && npmExecPath && /\.(?:c?js|mjs)$/i.test(npmExecPath)) {
-    return execFileAsync(process.execPath, [npmExecPath, ...args], { windowsHide: true });
+    return execFileAsync(process.execPath, [npmExecPath, ...args], execOptions);
   }
 
   const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  return execFileAsync(npmCommand, args, {
-    windowsHide: true,
-    // Windows 不能直接执行 .cmd；不在 npm/npx 进程内时通过命令解释器启动。
-    ...(process.platform === "win32" ? { shell: true } : {}),
-  });
+  return execFileAsync(npmCommand, args, execOptions);
 }
 
 function quoteCmd(value: string): string {

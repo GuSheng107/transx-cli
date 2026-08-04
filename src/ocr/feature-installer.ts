@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { cp, mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+import { stdout } from "node:process";
 
 import {
   OCR_MODEL_DISPLAY,
@@ -210,20 +211,24 @@ async function ensureCanvasDependency(packageRoot: string): Promise<void> {
     await import("@napi-rs/canvas");
     return;
   } catch {
-    // 未安装，继续安装
+    // 未安装或 native 二进制加载失败，继续尝试安装
   }
 
+  stdout.write(`正在安装 PDF 渲染依赖 ${OCR_CANVAS_PACKAGE}@${OCR_CANVAS_VERSION}…\n`);
   try {
-    await runNpm([
-      "install",
-      `${OCR_CANVAS_PACKAGE}@${OCR_CANVAS_VERSION}`,
-      "--no-save",
-      "--no-package-lock",
-      "--fund=false",
-      "--audit=false",
-      "--prefix",
-      packageRoot,
-    ]);
+    await runNpm(
+      [
+        "install",
+        `${OCR_CANVAS_PACKAGE}@${OCR_CANVAS_VERSION}`,
+        "--no-save",
+        "--no-package-lock",
+        "--fund=false",
+        "--audit=false",
+        "--prefix",
+        packageRoot,
+      ],
+      { timeout: 300_000 },
+    );
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new TransxError(
@@ -234,14 +239,15 @@ async function ensureCanvasDependency(packageRoot: string): Promise<void> {
     );
   }
 
-  // 安装后再次验证加载
+  // 安装后再次验证加载，区分"未安装"与"native 二进制不支持当前平台"
   try {
     await import("@napi-rs/canvas");
+    stdout.write(`${OCR_CANVAS_PACKAGE} 安装完成。\n`);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new TransxError(
       "OCR_INSTALL_FAILED",
-      `PDF 渲染依赖 ${OCR_CANVAS_PACKAGE} 加载失败：${detail}`,
+      `PDF 渲染依赖 ${OCR_CANVAS_PACKAGE} 已安装但加载失败，当前平台可能不支持：${detail}`,
       6,
       { cause: error },
     );
