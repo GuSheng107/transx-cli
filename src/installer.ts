@@ -11,6 +11,20 @@ import { getPackageInfo } from "./package-info.js";
 
 const execFileAsync = promisify(execFile);
 
+async function runNpm(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  const npmExecPath = process.env.npm_execpath;
+  if (process.platform === "win32" && npmExecPath && /\.(?:c?js|mjs)$/i.test(npmExecPath)) {
+    return execFileAsync(process.execPath, [npmExecPath, ...args], { windowsHide: true });
+  }
+
+  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+  return execFileAsync(npmCommand, args, {
+    windowsHide: true,
+    // Windows 不能直接执行 .cmd；不在 npm/npx 进程内时通过命令解释器启动。
+    ...(process.platform === "win32" ? { shell: true } : {}),
+  });
+}
+
 function quoteCmd(value: string): string {
   return value.replaceAll("%", "%%").replaceAll('"', '""');
 }
@@ -83,6 +97,25 @@ export async function installCurrentPackage(force = false): Promise<string> {
     );
   }
 
+  // npx 的临时 node_modules 不会随 dist 一起复制，目标目录必须拥有自己的生产依赖。
+  try {
+    await runNpm([
+      "install",
+      "--omit=dev",
+      "--ignore-scripts",
+      "--no-save",
+      "--no-package-lock",
+      "--fund=false",
+      "--audit=false",
+      "--prefix",
+      versionDirectory,
+    ]);
+  } catch (error) {
+    await rm(versionDirectory, { recursive: true, force: true });
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new TransxError("INSTALL_ERROR", `依赖安装失败：${detail}`, 5, { cause: error });
+  }
+
   const cliPath = path.join(targetDist, "cli.js");
   if (process.platform === "win32") {
     const launcher = `@echo off\r\nnode "${quoteCmd(cliPath)}" %*\r\n`;
@@ -101,9 +134,8 @@ export async function installCurrentPackage(force = false): Promise<string> {
 }
 
 export async function getLatestVersion(): Promise<string> {
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
   try {
-    const { stdout } = await execFileAsync(npmCommand, ["view", PACKAGE_NAME, "version", "--json"]);
+    const { stdout } = await runNpm(["view", PACKAGE_NAME, "version", "--json"]);
     return String(JSON.parse(stdout)).trim();
   } catch (error) {
     throw new TransxError("UPDATE_ERROR", "无法从 npm Registry 获取最新版本", 5, { cause: error });
@@ -111,13 +143,16 @@ export async function getLatestVersion(): Promise<string> {
 }
 
 export async function updateFromRegistry(): Promise<void> {
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
   try {
-    await execFileAsync(
-      npmCommand,
-      ["exec", "--yes", `--package=${PACKAGE_NAME}@latest`, "--", "transx", "install", "--force"],
-      { windowsHide: true },
-    );
+    await runNpm([
+      "exec",
+      "--yes",
+      `--package=${PACKAGE_NAME}@latest`,
+      "--",
+      "transx",
+      "install",
+      "--force",
+    ]);
   } catch (error) {
     throw new TransxError("UPDATE_ERROR", "更新失败，请检查 npm 和网络状态", 5, { cause: error });
   }

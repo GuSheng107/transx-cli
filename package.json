@@ -1,6 +1,6 @@
 {
   "name": "@gushengcode/transx-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "TransX CLI — DLX 翻译工具",
   "type": "module",
   "bin": {
@@ -8,15 +8,17 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "scripts/postinstall.mjs"
   ],
   "engines": {
-    "node": ">22"
+    "node": ">=22"
   },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test test/run-tests.ts",
+    "postinstall": "node scripts/postinstall.mjs",
     "prepack": "npm run build"
   },
   "keywords": [
