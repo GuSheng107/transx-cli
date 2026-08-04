@@ -24,17 +24,16 @@ export async function runNpm(
     });
   }
 
-  // 非 npm 生命周期内，Windows 需要 shell 执行 .cmd 文件。
-  // 使用 spawn 而非 execFile 避免 Node.js 22+ DEP0190 警告。
-  const useShell = process.platform === "win32";
-  const command = useShell ? "npm.cmd" : "npm";
+  // 非 npm 生命周期内，Windows 通过 cmd.exe /c 调用 npm，避免 shell:true 触发 DEP0190。
+  const isWindows = process.platform === "win32";
+  const command = isWindows ? process.env.ComSpec ?? "cmd.exe" : "npm";
+  const finalArgs = isWindows ? ["/c", "npm", ...args] : args;
   const spawnOptions = {
     windowsHide: true,
-    shell: useShell,
     ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
   };
   return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(command, args, spawnOptions);
+    const child = spawn(command, finalArgs, spawnOptions);
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
     child.stdout.on("data", (chunk: Buffer) => stdoutChunks.push(chunk));
