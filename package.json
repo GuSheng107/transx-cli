@@ -44,11 +44,9 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
+    "@napi-rs/canvas": "0.1.100",
     "fflate": "0.8.3",
     "unpdf": "1.7.0"
-  },
-  "optionalDependencies": {
-    "@napi-rs/canvas": "0.1.100"
   },
   "devDependencies": {
     "@types/node": "22.20.1",
