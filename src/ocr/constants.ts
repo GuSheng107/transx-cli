@@ -37,6 +37,10 @@ export const OCR_SUPPORTED_DOCUMENT_EXTENSIONS = [
 export const IMAGE_MAX_BYTES = 20 * 1024 * 1024;
 export const IMAGE_MAX_PIXELS = 40_000_000;
 
+// PDF 渲染依赖（与 package.json 的 optionalDependencies 保持一致）
+export const OCR_CANVAS_PACKAGE = "@napi-rs/canvas";
+export const OCR_CANVAS_VERSION = "0.1.100";
+
 export const PYTHON_MIN_VERSION = "3.10";
 
 export const OCR_LANGUAGES = "简体中文、繁体中文、英文、日文等 50 种";

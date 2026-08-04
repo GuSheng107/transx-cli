@@ -13,12 +13,15 @@ import {
   OCR_STAGING_DIR_NAME,
   OCR_VENV_DIR_NAME,
   PYTHON_MIN_VERSION,
+  OCR_CANVAS_PACKAGE,
+  OCR_CANVAS_VERSION,
 } from "./constants.js";
 import { TransxError } from "../errors.js";
 import { getVenvPython, runOcrSelfTest } from "./python-bridge.js";
 import type { OcrFeatureStateStore } from "./feature-state.js";
 import { getPackageInfo } from "../package-info.js";
 import { parseYesNo } from "../input.js";
+import { runNpm } from "../installer.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -115,6 +118,9 @@ export async function installOcrFeature(
     await cp(requirementsSrc, requirementsDst, { force: true });
     await installRequirements(venvPython, requirementsDst);
 
+    // 安装 Node 端 PDF 渲染依赖（PDF OCR 需要）
+    await ensureCanvasDependency(packageInfo.root);
+
     const scriptSrc = path.join(resourcesDir, OCR_SCRIPT_FILE_NAME);
     const scriptDst = path.join(stagingDir, OCR_SCRIPT_FILE_NAME);
     await cp(scriptSrc, scriptDst, { force: true });
@@ -195,5 +201,49 @@ async function installRequirements(venvPython: string, requirementsPath: string)
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new TransxError("OCR_INSTALL_FAILED", `安装 Python 依赖失败：${detail}`, 6, { cause: error });
+  }
+}
+
+async function ensureCanvasDependency(packageRoot: string): Promise<void> {
+  // 先检测是否已可加载（CLI 目录已安装则跳过）
+  try {
+    await import("@napi-rs/canvas");
+    return;
+  } catch {
+    // 未安装，继续安装
+  }
+
+  try {
+    await runNpm([
+      "install",
+      `${OCR_CANVAS_PACKAGE}@${OCR_CANVAS_VERSION}`,
+      "--no-save",
+      "--no-package-lock",
+      "--fund=false",
+      "--audit=false",
+      "--prefix",
+      packageRoot,
+    ]);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new TransxError(
+      "OCR_INSTALL_FAILED",
+      `PDF 渲染依赖 ${OCR_CANVAS_PACKAGE} 安装失败：${detail}`,
+      6,
+      { cause: error },
+    );
+  }
+
+  // 安装后再次验证加载
+  try {
+    await import("@napi-rs/canvas");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new TransxError(
+      "OCR_INSTALL_FAILED",
+      `PDF 渲染依赖 ${OCR_CANVAS_PACKAGE} 加载失败：${detail}`,
+      6,
+      { cause: error },
+    );
   }
 }

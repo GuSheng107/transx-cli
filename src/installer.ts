@@ -11,7 +11,7 @@ import { getPackageInfo } from "./package-info.js";
 
 const execFileAsync = promisify(execFile);
 
-async function runNpm(args: string[]): Promise<{ stdout: string; stderr: string }> {
+export async function runNpm(args: string[]): Promise<{ stdout: string; stderr: string }> {
   const npmExecPath = process.env.npm_execpath;
   if (process.platform === "win32" && npmExecPath && /\.(?:c?js|mjs)$/i.test(npmExecPath)) {
     return execFileAsync(process.execPath, [npmExecPath, ...args], { windowsHide: true });
