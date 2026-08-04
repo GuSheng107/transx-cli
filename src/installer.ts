@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -16,18 +16,42 @@ export async function runNpm(
   options: { timeout?: number } = {},
 ): Promise<{ stdout: string; stderr: string }> {
   const npmExecPath = process.env.npm_execpath;
-  const execOptions = {
-    windowsHide: true,
-    ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
-    // Windows 不能直接执行 .cmd；不在 npm/npx 进程内时通过命令解释器启动。
-    ...(process.platform === "win32" ? { shell: true } : {}),
-  };
+  // 在 npm 生命周期内可直接通过 Node 执行 npm CLI 脚本，无需 shell。
   if (process.platform === "win32" && npmExecPath && /\.(?:c?js|mjs)$/i.test(npmExecPath)) {
-    return execFileAsync(process.execPath, [npmExecPath, ...args], execOptions);
+    return execFileAsync(process.execPath, [npmExecPath, ...args], {
+      windowsHide: true,
+      ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
+    });
   }
 
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  return execFileAsync(npmCommand, args, execOptions);
+  // 非 npm 生命周期内，Windows 需要 shell 执行 .cmd 文件。
+  // 使用 spawn 而非 execFile 避免 Node.js 22+ DEP0190 警告。
+  const useShell = process.platform === "win32";
+  const command = useShell ? "npm.cmd" : "npm";
+  const spawnOptions = {
+    windowsHide: true,
+    shell: useShell,
+    ...(options.timeout !== undefined ? { timeout: options.timeout } : {}),
+  };
+  return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+    const child = spawn(command, args, spawnOptions);
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+    child.stdout.on("data", (chunk: Buffer) => stdoutChunks.push(chunk));
+    child.stderr.on("data", (chunk: Buffer) => stderrChunks.push(chunk));
+    child.once("error", reject);
+    child.once("close", (code) => {
+      const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+      const stderr = Buffer.concat(stderrChunks).toString("utf8");
+      if (code !== 0) {
+        const error = new Error(`npm ${args[0]} 退出码 ${code}${stderr ? `：${stderr.trim()}` : ""}`);
+        Object.assign(error, { stdout, stderr, code });
+        reject(error);
+        return;
+      }
+      resolve({ stdout, stderr });
+    });
+  });
 }
 
 function quoteCmd(value: string): string {
