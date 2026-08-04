@@ -16,15 +16,23 @@
 - macOS（Apple Silicon 与 Intel，zsh / bash）
 - Linux（x64 / arm64，bash / zsh）
 
-需要 Node.js > 22。
+需要 Node.js 22 或更高版本。
 
 ## 安装
 
+直接使用 npm 安装：
+
 ```bash
-npx @gushengcode/transx-cli@latest install
+npm i @gushengcode/transx-cli
 ```
 
-这会把 `transx` 装到用户目录，并把启动入口加进 PATH：
+安装过程会自动部署运行依赖、用户级 `transx` 启动入口并加入 PATH，无需再执行 `transx install` 或手动安装依赖。首次安装后重新打开终端，即可直接运行：
+
+```bash
+transx help
+```
+
+安装位置：
 
 ```text
 Windows：    %LOCALAPPDATA%\.transx\bin\transx.cmd
@@ -210,7 +218,7 @@ npm run build    # 编译到 dist/
 npm pack --dry-run
 ```
 
-要求 Node.js > 22。每次提交会在 Windows、macOS、Linux 三系统跑类型检查、构建和打包检查。
+要求 Node.js 22 或更高版本。每次提交会在 Windows、macOS、Linux 三系统跑类型检查、构建和打包检查。
 
 ## 许可
 
