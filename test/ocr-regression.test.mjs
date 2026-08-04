@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -26,6 +26,32 @@ const tinyPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
   "base64",
 );
+
+async function execFileWithInput(file, args, input, options = {}) {
+  return await new Promise((resolve, reject) => {
+    const child = spawn(file, args, {
+      ...options,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.once("error", reject);
+    child.once("close", (code) => {
+      if (code === 0) resolve({ stdout, stderr });
+      else {
+        reject(Object.assign(
+          new Error(`process exited with code ${code}; stdout=${stdout}; stderr=${stderr}`),
+          { code, stdout, stderr },
+        ));
+      }
+    });
+    child.stdin.end(input);
+  });
+}
 
 test("package and lock file report version 1.0.4", async () => {
   const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
@@ -412,6 +438,71 @@ test("non-interactive JSON image translation stops after OCR until confirmation"
     assert.match(intermediate, /LOCAL OCR/);
     assert.match(intermediate, /"confidence":0\.99/);
     assert.match(stderr, /正在识别/);
+  } finally {
+    await rm(temporaryHome, { recursive: true, force: true });
+  }
+});
+
+test("image translation sends recognized text only after explicit y confirmation", async () => {
+  const temporaryHome = await mkdtemp(path.join(os.tmpdir(), "transx-confirmed-translation-test-"));
+  try {
+    const featureDirectory = path.join(temporaryHome, ".transx", "features", "ocr");
+    const pythonDirectory = process.platform === "win32"
+      ? path.join(featureDirectory, "venv", "Scripts")
+      : path.join(featureDirectory, "venv", "bin");
+    const pythonPath = path.join(pythonDirectory, process.platform === "win32" ? "python.exe" : "python");
+    await mkdir(pythonDirectory, { recursive: true });
+    await copyFile(process.execPath, pythonPath);
+    await writeFile(
+      path.join(featureDirectory, "ocr.py"),
+      'console.log(JSON.stringify({ok:true,text:"LOCAL OCR",items:[{text:"LOCAL OCR",confidence:0.99}]}));\n',
+    );
+    await writeFile(path.join(featureDirectory, "state.json"), JSON.stringify({
+      status: "ready",
+      feature_version: "1",
+      engine: "rapidocr-openvino",
+      model: "ppocr-v6-small",
+      model_display: "PP-OCRv6 Quality",
+      runtime_version: "test",
+      platform: process.platform,
+      arch: process.arch,
+      installed_at: new Date(0).toISOString(),
+      verified: true,
+    }));
+    const fetchPreload = path.join(temporaryHome, "mock-fetch.cjs");
+    await writeFile(fetchPreload, `
+globalThis.fetch = async (_url, options) => {
+  const payload = JSON.parse(String(options?.body ?? "{}"));
+  process.stderr.write("MOCK_TRANSLATION_REQUEST:" + JSON.stringify(payload) + "\\n");
+  return new Response(JSON.stringify({ code: 200, data: "TRANSLATED" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+};
+`);
+    const imagePath = path.join(temporaryHome, "input.png");
+    await writeFile(imagePath, tinyPng);
+    const args = [path.join(root, "dist", "cli.js"), "translate", "--image", imagePath, "--to", "EN"];
+    const options = {
+      env: {
+        ...process.env,
+        HOME: temporaryHome,
+        USERPROFILE: temporaryHome,
+        LOCALAPPDATA: path.join(temporaryHome, "AppData", "Local"),
+        DLX_API_KEY: "test-key",
+        NODE_OPTIONS: `--require=${fetchPreload}`,
+      },
+      windowsHide: true,
+    };
+
+    const declined = await execFileWithInput(process.execPath, args, "N\n", options);
+    assert.match(declined.stdout, /已取消/);
+    assert.doesNotMatch(declined.stderr, /MOCK_TRANSLATION_REQUEST/);
+
+    const confirmed = await execFileWithInput(process.execPath, args, "Y\n", options);
+    assert.match(confirmed.stderr, /已确认，进入文件翻译流程/);
+    assert.match(confirmed.stderr, /MOCK_TRANSLATION_REQUEST:/);
+    assert.match(confirmed.stdout, /译文已保存/);
   } finally {
     await rm(temporaryHome, { recursive: true, force: true });
   }
