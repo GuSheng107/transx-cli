@@ -1050,10 +1050,11 @@ code, pre { font-family: var(--mono); }
 .section-heading h2 { margin: 10px 0 12px; font: 750 clamp(30px, 4vw, 46px)/1 var(--display); letter-spacing: -0.035em; }
 .section-heading > p { color: var(--text-dim); font-size: 15px; }
 
-.mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 42px; }
+.mode-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 42px; }
 
 .mode-card {
   position: relative;
+  min-width: 0;
   padding: 26px;
   border: 1px solid var(--border);
   border-radius: 13px;
@@ -1071,6 +1072,8 @@ code, pre { font-family: var(--mono); }
 .mode-card h3 { margin: 22px 0 9px; font: 750 22px/1 var(--display); }
 .mode-card > p { min-height: 68px; color: var(--text-dim); font-size: 13px; }
 .mode-card code { color: var(--accent); font-size: 11px; }
+.mode-card .cmd-block { min-width: 0; padding-right: 20px; }
+.mode-card .cmd-block code { min-width: 0; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
 .mode-card ul { margin: 20px 0 0; padding: 17px 0 0; border-top: 1px solid var(--border-soft); list-style: none; }
 .mode-card li { position: relative; padding: 5px 0 5px 17px; color: var(--text-dim); font-size: 12px; }
 .mode-card li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
@@ -1218,10 +1221,16 @@ code, pre { font-family: var(--mono); }
 
 /* ===== 响应式 ===== */
 
+@media (max-width: 1100px) {
+  .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-card.cli-card { grid-column: 1 / -1; }
+}
+
 @media (max-width: 900px) {
   .skills-hero { padding: 78px 24px 64px; }
   .install-options { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: 1fr; }
+  .mode-card.cli-card { grid-column: auto; }
   .mode-card > p { min-height: 0; }
   .docs-layout {
     grid-template-columns: 1fr;

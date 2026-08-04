@@ -1,5 +1,4 @@
 import { stdin, stdout } from "node:process";
-import { emitKeypressEvents } from "node:readline";
 
 import { TransxError } from "./errors.js";
 
@@ -12,6 +11,8 @@ export interface InteractiveMenuItem<T extends string = string> {
 export type InteractiveAction =
   | "translate"
   | "translate_file"
+  | "translate_image"
+  | "ocr_enable"
   | "init"
   | "config"
   | "update"
@@ -25,23 +26,35 @@ const UNINITIALIZED_MENU_ITEMS: Array<InteractiveMenuItem<InteractiveAction>> = 
   { value: "exit", label: "退出", description: "结束 TransX CLI" },
 ];
 
-const INITIALIZED_MENU_ITEMS: Array<InteractiveMenuItem<InteractiveAction>> = [
+const INITIALIZED_MENU_ITEMS_WITH_OCR: Array<InteractiveMenuItem<InteractiveAction>> = [
   { value: "translate", label: "翻译文本", description: "输入文本并选择目标语言" },
   { value: "translate_file", label: "翻译文件", description: "输入文件路径并选择目标语言" },
+  { value: "translate_image", label: "图片识别翻译", description: "识别图片或文件内图片，确认后翻译" },
   { value: "init", label: "重新初始化", description: "重新设置 DLX API Key" },
-  { value: "config", label: "查看 / 更改配置", description: "查看完整配置或维护 API Key" },
+  { value: "config", label: "查看当前配置", description: "只读显示当前完整配置" },
   { value: "update", label: "检查版本更新", description: "比较 npm Registry 最新版本" },
   { value: "help", label: "查看帮助", description: "显示所有命令与参数" },
   { value: "exit", label: "退出", description: "结束 TransX CLI" },
 ];
 
-export function getInteractiveMenuItems(initialized: boolean): Array<InteractiveMenuItem<InteractiveAction>> {
-  return initialized ? INITIALIZED_MENU_ITEMS : UNINITIALIZED_MENU_ITEMS;
-}
+const INITIALIZED_MENU_ITEMS_OCR_DISABLED: Array<InteractiveMenuItem<InteractiveAction>> = [
+  { value: "translate", label: "翻译文本", description: "输入文本并选择目标语言" },
+  { value: "translate_file", label: "翻译文件", description: "输入文件路径并选择目标语言" },
+  { value: "ocr_enable", label: "开启图片识别翻译扩展", description: "安装 OCR 扩展（需要 Python）" },
+  { value: "init", label: "重新初始化", description: "重新设置 DLX API Key" },
+  { value: "config", label: "查看当前配置", description: "只读显示当前完整配置" },
+  { value: "update", label: "检查版本更新", description: "比较 npm Registry 最新版本" },
+  { value: "help", label: "查看帮助", description: "显示所有命令与参数" },
+  { value: "exit", label: "退出", description: "结束 TransX CLI" },
+];
 
-interface Keypress {
-  name?: string;
-  ctrl?: boolean;
+export function getInteractiveMenuItems(
+  initialized: boolean,
+  ocrReady = false,
+): Array<InteractiveMenuItem<InteractiveAction>> {
+  if (!initialized) return UNINITIALIZED_MENU_ITEMS;
+  if (ocrReady) return INITIALIZED_MENU_ITEMS_WITH_OCR;
+  return INITIALIZED_MENU_ITEMS_OCR_DISABLED;
 }
 
 const ANSI = {
@@ -99,7 +112,7 @@ export function buildInteractiveFrame<T extends string>(options: {
     "",
     ...menu,
     "",
-    paint("↑↓ 选择 · Enter 确认 · Esc 退出 · 数字键直达", "dim", color),
+    paint("可交互 CLI", "dim", color),
   ].join("\n");
 }
 
@@ -118,7 +131,6 @@ export async function selectInteractiveMenu<T extends string>(options: {
 
   const color = !process.env.NO_COLOR;
   let selectedIndex = 0;
-  emitKeypressEvents(stdin);
   stdin.setRawMode(true);
   stdin.resume();
   stdin.setEncoding("utf8");
@@ -132,7 +144,7 @@ export async function selectInteractiveMenu<T extends string>(options: {
   render();
   return await new Promise<T | null>((resolve, reject) => {
     const cleanup = (): void => {
-      stdin.removeListener("keypress", onKeypress);
+      stdin.removeListener("data", onData);
       stdin.setRawMode(false);
       stdin.pause();
       stdout.write(`${ANSI.showCursor}\n`);
@@ -141,35 +153,36 @@ export async function selectInteractiveMenu<T extends string>(options: {
       cleanup();
       resolve(value);
     };
-    const onKeypress = (input: string, key: Keypress): void => {
-      if (key.ctrl && key.name === "c") {
+    const onData = (input: string): void => {
+      if (input.includes("\u0003")) {
         cleanup();
         reject(new TransxError("CANCELLED", "操作已取消", 130));
         return;
       }
-      if (key.name === "escape") {
-        finish(null);
-        return;
-      }
-      if (key.name === "up") {
+      if (input === "\u001b[A") {
         selectedIndex = (selectedIndex - 1 + options.items.length) % options.items.length;
         render();
         return;
       }
-      if (key.name === "down") {
+      if (input === "\u001b[B") {
         selectedIndex = (selectedIndex + 1) % options.items.length;
         render();
         return;
       }
-      if (key.name === "return" || key.name === "enter") {
+      // An unrecognized escape-prefixed sequence is still an explicit Esc action.
+      if (input.includes("\u001b")) {
+        finish(null);
+        return;
+      }
+      if (input.includes("\r") || input.includes("\n")) {
         finish(options.items[selectedIndex]?.value ?? null);
         return;
       }
-      const numericIndex = Number(input) - 1;
+      const numericIndex = Number(input.trim()) - 1;
       if (Number.isInteger(numericIndex) && numericIndex >= 0 && numericIndex < options.items.length) {
         finish(options.items[numericIndex]?.value ?? null);
       }
     };
-    stdin.on("keypress", onKeypress);
+    stdin.on("data", onData);
   });
 }

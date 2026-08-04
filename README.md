@@ -40,10 +40,20 @@ macOS/Linux：~/.transx/bin/transx
 配置目录：    ~/.transx/
 ```
 
-重新打开终端后，直接运行 `transx` 进入交互界面，或查看完整帮助：
+重新打开终端后，直接运行 `transx` 进入可交互 CLI，或查看完整帮助：
 
 ```bash
 transx help
+```
+
+查看当前生效的 CLI 路径：
+
+```bat
+# Windows
+where transx
+
+# macOS / Linux
+which transx
 ```
 
 ## AI Agent Skill
@@ -109,7 +119,14 @@ transx translate --file ./paper.pdf --to ZH --timeout 60
 
 支持 `txt`、`md`、`csv`、`log`、`docx`、`xlsx`、`pptx`、`pdf`。译文默认写入源文件目录，文件名为 `<源文件名>_<目标语言>`；PDF 输出 DOCX。无法创建文件时返回文本或 JSON。
 
-单条文本上限 1500 字符。文件上限 20MB、可翻译文本上限 100000 字符、最多 500 次请求。文件按段落、同格式文字或单元格分批请求，并输出进度。
+识别图片或文件内图片并翻译（需先开启 OCR 扩展）：
+
+```bash
+transx translate --image ./screenshot.png --to ZH --json
+transx translate --image ./scan.pdf --to ZH --json
+```
+
+单条文本上限 1500 字符。文件上限 20MB、可翻译文本上限 100000 字符、最多 500 次请求。文件按段落、同格式文字或单元格拆分，最多 5 个请求并发执行，并输出进度。
 
 完整参数：
 
@@ -117,10 +134,56 @@ transx translate --file ./paper.pdf --to ZH --timeout 60
 -t, --to <lang>              目标语言（必填）
 -s, --source <lang>          源语言，默认 auto
 -f, --file <path>            从文件提取文本翻译（与位置文本互斥）
+    --image <path>           OCR 识别图片或文件内图片，确认后翻译
 -o, --output <path>          指定译文文件路径
     --json                   输出 AI 友好的 JSON
     --timeout <seconds>      本次请求超时
 ```
+
+## 图片识别翻译（OCR）
+
+TransX CLI 先在本地识别文字，生成 `<源文件名>_OCR.md` 并显示预览。用户确认后，中间文件才会进入现有文件翻译流程。
+
+```bash
+transx translate --image ./screenshot.png --to ZH --json
+```
+
+支持图片、PDF 页面、DOCX/PPTX 内嵌图片和 Markdown 本地图片。Markdown 远程图片不会下载。输入上限 20MB，最多识别 100 张图片或 100 页 PDF，单张图片上限 4000 万像素。
+
+首次使用需开启 OCR 扩展，CLI 会显示安装信息并询问是否下载：
+
+```bash
+transx ocr enable
+```
+
+需要 Python 3.10+，下载约 180 MB。模型为 PP-OCRv6 Quality（基于 RapidOCR + OpenVINO），支持简体中文、繁体中文、英文、日文等 50 种语言。
+
+查看 OCR 扩展状态：
+
+```bash
+transx ocr status
+transx ocr status --json
+```
+
+`transx ocr recognize` 只在本地识别，不调用 DLX。原文、来源、置信度和坐标保存在中间文件；JSON 返回 `recognition_file` 路径和预览：
+
+```bash
+transx ocr recognize ./image.png --json
+transx ocr recognize ./scan.pdf --json
+transx ocr recognize ./report.docx --json
+```
+
+删除 OCR 扩展：
+
+```bash
+transx ocr remove --yes
+```
+
+OCR 扩展安装在 `~/.transx/features/ocr/`，与 CLI 主依赖隔离。
+
+`transx translate --image` 生成中间文件后询问是否翻译。输入 `y` 或 `Y` 后，按普通文件的并发流程翻译；输入 `n`、`N` 或按 Esc 不发送，中间文件仍保留。非交互 `--json` 返回文件路径、预览和 `awaiting_confirmation` 状态。
+
+Skill 使用相同流程：先生成中间文件并征得确认，再调用文件翻译。Node.js 和 CLI 模式支持上述文件范围；Python 模式只支持独立图片。
 
 成功输出：
 

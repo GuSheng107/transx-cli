@@ -52,9 +52,21 @@ async function ensureWindowsUserPath(binDirectory: string): Promise<void> {
   });
 }
 
+export function getPosixProfilePath(
+  platform: NodeJS.Platform = process.platform,
+  shell = process.env.SHELL ?? "",
+  homeDirectory = os.homedir(),
+): string {
+  const shellName = path.posix.basename(shell);
+  if (shellName === "zsh") return path.posix.join(homeDirectory, ".zshrc");
+  if (shellName === "bash") {
+    return path.posix.join(homeDirectory, platform === "darwin" ? ".bash_profile" : ".bashrc");
+  }
+  return path.posix.join(homeDirectory, ".profile");
+}
+
 async function ensurePosixPath(binDirectory: string): Promise<void> {
-  const shellName = path.basename(process.env.SHELL || "sh");
-  const profile = path.join(os.homedir(), shellName === "zsh" ? ".zshrc" : ".bashrc");
+  const profile = getPosixProfilePath();
   const marker = "# transx-cli user bin";
   let existing = "";
   try {
@@ -63,7 +75,7 @@ async function ensurePosixPath(binDirectory: string): Promise<void> {
     // A missing profile will be created below.
   }
   if (!existing.includes(marker)) {
-    const block = `\n${marker}\nexport PATH="${binDirectory}:$PATH"\n`;
+    const block = `\n${marker}\nexport PATH=${quoteShell(binDirectory)}:"$PATH"\n`;
     await writeFile(profile, `${existing}${block}`, "utf8");
   }
 }
@@ -73,6 +85,7 @@ export async function installCurrentPackage(force = false): Promise<string> {
   const binDirectory = getBinDirectory();
   const versionDirectory = path.join(binDirectory, packageInfo.version);
   const targetDist = path.join(versionDirectory, "dist");
+  const targetOcrResources = path.join(versionDirectory, "resources", "ocr");
   if (force) {
     await rm(versionDirectory, { recursive: true, force: true });
   }
@@ -88,6 +101,14 @@ export async function installCurrentPackage(force = false): Promise<string> {
       force,
       errorOnExist: !force,
     });
+    await mkdir(targetOcrResources, { recursive: true, mode: 0o700 });
+    for (const fileName of ["ocr.py", "requirements-ocr.txt"]) {
+      await cp(
+        path.join(packageInfo.root, "resources", "ocr", fileName),
+        path.join(targetOcrResources, fileName),
+        { force, errorOnExist: !force },
+      );
+    }
   } catch (error) {
     throw new TransxError(
       "INSTALL_ERROR",
@@ -140,6 +161,42 @@ export async function getLatestVersion(): Promise<string> {
   } catch (error) {
     throw new TransxError("UPDATE_ERROR", "无法从 npm Registry 获取最新版本", 5, { cause: error });
   }
+}
+
+export function compareVersions(left: string, right: string): number {
+  const parse = (value: string): { core: number[]; prerelease: string[] } => {
+    const match = value.trim().match(/^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/);
+    if (!match) throw new TransxError("UPDATE_ERROR", `无法比较版本号：${value}`, 5);
+    return {
+      core: [Number(match[1]), Number(match[2]), Number(match[3])],
+      prerelease: match[4]?.split(".") ?? [],
+    };
+  };
+
+  const leftVersion = parse(left);
+  const rightVersion = parse(right);
+  for (let index = 0; index < leftVersion.core.length; index += 1) {
+    const difference = (leftVersion.core[index] ?? 0) - (rightVersion.core[index] ?? 0);
+    if (difference !== 0) return Math.sign(difference);
+  }
+  if (leftVersion.prerelease.length === 0 || rightVersion.prerelease.length === 0) {
+    return leftVersion.prerelease.length === rightVersion.prerelease.length
+      ? 0
+      : leftVersion.prerelease.length === 0 ? 1 : -1;
+  }
+  const length = Math.max(leftVersion.prerelease.length, rightVersion.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = leftVersion.prerelease[index];
+    const rightPart = rightVersion.prerelease[index];
+    if (leftPart === undefined || rightPart === undefined) return leftPart === undefined ? -1 : 1;
+    if (leftPart === rightPart) continue;
+    const leftNumeric = /^\d+$/.test(leftPart);
+    const rightNumeric = /^\d+$/.test(rightPart);
+    if (leftNumeric && rightNumeric) return Math.sign(Number(leftPart) - Number(rightPart));
+    if (leftNumeric !== rightNumeric) return leftNumeric ? -1 : 1;
+    return leftPart.localeCompare(rightPart) < 0 ? -1 : 1;
+  }
+  return 0;
 }
 
 export async function updateFromRegistry(): Promise<void> {

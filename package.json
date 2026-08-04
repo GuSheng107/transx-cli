@@ -1,6 +1,6 @@
 {
   "name": "@gushengcode/transx-cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "TransX CLI — DLX 翻译工具",
   "type": "module",
   "bin": {
@@ -8,6 +8,8 @@
   },
   "files": [
     "dist",
+    "resources/ocr/ocr.py",
+    "resources/ocr/requirements-ocr.txt",
     "README.md",
     "scripts/postinstall.mjs"
   ],
@@ -16,8 +18,9 @@
   },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
+    "build:skill-zip": "node scripts/build-skill-zip.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test test/run-tests.ts",
+    "test": "npm run check && npm run build && node --test test/*.test.mjs",
     "postinstall": "node scripts/postinstall.mjs",
     "prepack": "npm run build"
   },
@@ -41,6 +44,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
+    "@napi-rs/canvas": "0.1.100",
     "fflate": "0.8.3",
     "unpdf": "1.7.0"
   },

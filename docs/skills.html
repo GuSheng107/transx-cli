@@ -10,7 +10,7 @@
     <meta property="og:type" content="website" />
     <title>Skills — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260804-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260804-2" />
     <script src="./app.js?v=20260804-1" defer></script>
   </head>
   <body class="skills-page">
@@ -62,19 +62,19 @@
             <div class="mode-top"><span class="mode-symbol">PY</span><b>推荐</b></div>
             <h3>Python 脚本</h3>
             <p>通过 Python 调用 DLX。</p>
-            <ul><li>需要 Python 3</li><li>Python 生态</li><li>文本与文件翻译</li></ul>
+            <ul><li>需要 Python 3</li><li>Python 生态</li><li>文本、文件与图片翻译</li></ul>
           </article>
           <article class="mode-card">
             <div class="mode-top"><span class="mode-symbol">JS</span><b>脚本</b></div>
             <h3>Node.js 脚本</h3>
             <p>使用 Skill 内的 Node.js 脚本。</p>
-            <ul><li>需要 Node.js 18+</li><li>Node.js 生态</li><li>文本与文件翻译</li></ul>
+            <ul><li>需要 Node.js 18+</li><li>Node.js 生态</li><li>文本、文件与图片翻译</li></ul>
           </article>
           <article class="mode-card cli-card">
             <div class="mode-top"><span class="mode-symbol">TX</span><b>CLI</b></div>
             <h3>TransX CLI</h3>
             <p>安装并使用 <code>transx</code> 命令。</p>
-            <ul><li>需要 Node.js &gt; 22</li><li>文本与文件翻译</li><li>交互界面</li></ul>
+            <ul><li>需要 Node.js 22+</li><li>文本、文件与图片翻译</li><li>交互界面</li></ul>
           </article>
         </div>
         <div class="shared-history">
@@ -126,6 +126,14 @@
 ├── package.json
 ├── package-lock.json
 ├── requirements.txt
+├── ocr-node/
+│   ├── ocr.mjs
+│   ├── intermediate.mjs
+│   ├── pdf-renderer.mjs
+│   └── visual-input.mjs
+├── ocr-python/
+│   ├── ocr.py
+│   └── requirements-ocr.txt
 └── scripts/
     ├── translate.py
     ├── translate.mjs
@@ -135,6 +143,41 @@
           </div>
         </div>
         <p class="skill-security">API Key：<code>~/.transx/credentials.json</code>。环境变量：<code>DLX_API_KEY</code>。<a href="https://connect.linux.do/">获取 API Key</a>。</p>
+      </section>
+
+      <section class="skills-section" aria-labelledby="ocr-title">
+        <div class="section-heading">
+          <span class="kicker">OCR</span>
+          <h2 id="ocr-title">图片识别翻译扩展</h2>
+          <p>先在本地识别并生成中间文件，用户确认后再翻译。</p>
+        </div>
+        <div class="mode-grid">
+          <article class="mode-card recommended">
+            <div class="mode-top"><span class="mode-symbol">PY</span><b>Python</b></div>
+            <h3>Python 脚本模式</h3>
+            <p>支持独立图片。识别后先生成中间文件并等待确认。</p>
+            <div class="cmd-block"><code>python &lt;skill-dir&gt;/ocr-python/ocr.py --image ./image.png --save</code></div>
+            <p class="doc-note">配置时可选择启用；OCR 与翻译依赖使用独立环境。</p>
+          </article>
+          <article class="mode-card">
+            <div class="mode-top"><span class="mode-symbol">JS</span><b>Node.js</b></div>
+            <h3>Node.js 脚本模式</h3>
+            <p>支持图片、PDF、DOCX、PPTX 和 Markdown 本地图片。</p>
+            <div class="cmd-block"><code>node &lt;skill-dir&gt;/ocr-node/ocr.mjs recognize ./image.png --json</code></div>
+            <p class="doc-note">先展示预览和文件路径，确认后进入文件翻译。</p>
+          </article>
+          <article class="mode-card cli-card">
+            <div class="mode-top"><span class="mode-symbol">TX</span><b>CLI</b></div>
+            <h3>TransX CLI 模式</h3>
+            <p>识别图片或文件内图片，生成中间文件，确认后翻译。</p>
+            <div class="cmd-block"><code>transx ocr recognize ./image.png --json</code></div>
+            <p class="doc-note">确认后使用 <code>recognition_file</code> 进入文件翻译；未确认不发送。</p>
+          </article>
+        </div>
+        <div class="shared-history">
+          <span class="history-mark" aria-hidden="true">🔒</span>
+          <div><strong>本地识别</strong><p>原文件不会上传。需要 Python 3.10+，下载约 180 MB；模型为 PP-OCRv6 Quality（RapidOCR + OpenVINO）。</p></div>
+        </div>
       </section>
     </main>
 

@@ -10,7 +10,7 @@ import {
   type HistoryRecord,
   toChinaTimestamp,
 } from "./history.js";
-import { promptText } from "./input.js";
+import { promptYesNo } from "./input.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -199,8 +199,7 @@ async function confirmClear(yes: boolean): Promise<void> {
   if (!stdin.isTTY) {
     throw new TransxError("INVALID_ARGUMENT", "非交互环境清理历史必须添加 --yes", 2);
   }
-  const answer = (await promptText("确认删除匹配的翻译历史？输入 yes：")).trim().toLocaleLowerCase();
-  if (answer !== "yes" && answer !== "y" && answer !== "是") {
+  if (!await promptYesNo("确认删除匹配的翻译历史？ [y/n] ")) {
     throw new TransxError("CANCELLED", "已取消清理翻译历史", 130);
   }
 }

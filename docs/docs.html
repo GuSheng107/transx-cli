@@ -7,7 +7,7 @@
     <meta name="description" content="TransX CLI 工具文档：逐条说明每个指令的语法、专属参数、示例与返回格式。" />
     <title>工具文档 — TransX CLI</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260804-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260804-2" />
     <script src="./app.js?v=20260804-1" defer></script>
   </head>
   <body class="docs-page">
@@ -34,14 +34,15 @@
         <a href="#cmd-init"><span>03</span><span class="nav-label"><strong>init</strong><small>初始化连接配置</small></span></a>
         <a href="#cmd-translate"><span>04</span><span class="nav-label"><strong>translate</strong><small>翻译文本</small></span></a>
         <a href="#cmd-languages"><span>05</span><span class="nav-label"><strong>languages</strong><small>查看支持的语言</small></span></a>
-        <a href="#cmd-history"><span>06</span><span class="nav-label"><strong>history</strong><small>查看、搜索和清理历史</small></span></a>
-        <a href="#cmd-config"><span>07</span><span class="nav-label"><strong>config</strong><small>查看和管理配置</small></span></a>
+        <a href="#cmd-ocr"><span>06</span><span class="nav-label"><strong>ocr</strong><small>图片识别翻译</small></span></a>
+        <a href="#cmd-history"><span>07</span><span class="nav-label"><strong>history</strong><small>查看、搜索和清理历史</small></span></a>
+        <a href="#cmd-config"><span>08</span><span class="nav-label"><strong>config</strong><small>查看和管理配置</small></span></a>
         <p class="docs-nav-group">安装与维护</p>
-        <a href="#cmd-install"><span>08</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
-        <a href="#cmd-version"><span>09</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
-        <a href="#cmd-update"><span>10</span><span class="nav-label"><strong>update</strong><small>更新到最新版</small></span></a>
+        <a href="#cmd-install"><span>09</span><span class="nav-label"><strong>install</strong><small>安装到用户目录</small></span></a>
+        <a href="#cmd-version"><span>10</span><span class="nav-label"><strong>version</strong><small>查看和检查版本</small></span></a>
+        <a href="#cmd-update"><span>11</span><span class="nav-label"><strong>update</strong><small>更新到最新版</small></span></a>
         <p class="docs-nav-group">输出</p>
-        <a href="#cmd-output"><span>11</span><span class="nav-label"><strong>JSON 与错误码</strong><small>输出格式</small></span></a>
+        <a href="#cmd-output"><span>12</span><span class="nav-label"><strong>JSON 与错误码</strong><small>输出格式</small></span></a>
       </aside>
 
       <div class="docs-content">
@@ -49,7 +50,7 @@
           <div class="doc-index">01</div>
           <span class="kicker">INTERACTIVE</span>
           <h1><code>transx</code></h1>
-          <p class="doc-lead">打开交互界面，可翻译文本或文件。非交互环境输出帮助。</p>
+          <p class="doc-lead">打开可交互 CLI，支持翻译文本、文件或图片。非交互环境输出帮助。</p>
           <div class="cmd-block command-syntax"><code id="code-start">transx</code><button type="button" class="copy-btn" data-copy="code-start" aria-label="复制 transx 命令">复制</button></div>
           <div class="terminal-state-grid">
             <figure>
@@ -93,7 +94,7 @@
           <span class="kicker">TRANSLATE</span>
           <h2><code>transx translate</code></h2>
           <p class="doc-lead">翻译文本、stdin 或文件。Agent 调用使用 <code>--json</code>。</p>
-          <div class="cmd-block command-syntax"><code id="code-translate">transx translate [text | --file &lt;path&gt;] --to &lt;lang&gt; [options]</code><button type="button" class="copy-btn" data-copy="code-translate" aria-label="复制 translate 命令">复制</button></div>
+          <div class="cmd-block command-syntax"><code id="code-translate">transx translate [text | --file &lt;path&gt; | --image &lt;path&gt;] --to &lt;lang&gt; [options]</code><button type="button" class="copy-btn" data-copy="code-translate" aria-label="复制 translate 命令">复制</button></div>
           <h3 class="sub-h">专属参数</h3>
           <div class="opt-table">
             <div class="opt-row opt-head"><span>参数</span><span>作用</span><span>默认值</span></div>
@@ -101,6 +102,7 @@
             <div class="opt-row"><code>-t, --to &lt;lang&gt;</code><span>目标语言，必填，例如 <code>ZH</code>、<code>EN</code></span><span class="dim">—</span></div>
             <div class="opt-row"><code>-s, --source &lt;lang&gt;</code><span>源语言</span><span class="dim">auto</span></div>
             <div class="opt-row"><code>-f, --file &lt;path&gt;</code><span>翻译 txt/md/csv/log/docx/xlsx/pptx/pdf，与位置文本互斥</span><span class="dim">—</span></div>
+            <div class="opt-row"><code>--image &lt;path&gt;</code><span>识别图片或文件内图片，生成中间文件，确认后翻译</span><span class="dim">—</span></div>
             <div class="opt-row"><code>-o, --output &lt;path&gt;</code><span>指定译文文件路径</span><span class="dim">源文件目录</span></div>
             <div class="opt-row"><code>--json</code><span>输出单行 JSON</span><span class="dim">关闭</span></div>
             <div class="opt-row"><code>--timeout &lt;seconds&gt;</code><span>仅设置本次请求的超时时间，必须为正数</span><span class="dim">20</span></div>
@@ -110,8 +112,9 @@
           <div class="cmd-block"><code id="example-translate">transx translate "Hello world" --to ZH --json</code><button type="button" class="copy-btn" data-copy="example-translate" aria-label="复制 translate 示例">复制</button></div>
           <p class="doc-note">stdin：<code>echo "Hello world" | transx translate --to ZH --json</code></p>
           <p class="doc-note">文件：<code>transx translate --file ./paper.pdf --to ZH --json</code></p>
-          <p class="doc-note">输出：<code>&lt;源文件名&gt;_&lt;目标语言&gt;</code>；PDF 输出 DOCX。</p>
-          <p class="doc-note">限制：文件 20MB，可翻译文本 100000 字符，最多 500 次请求。</p>
+          <p class="doc-note">图片：<code>transx translate --image ./screenshot.png --to ZH --json</code></p>
+          <p class="doc-note">输出：<code>&lt;源文件名&gt;_&lt;目标语言&gt;</code>；PDF 输出 DOCX。文件最多 5 个请求并发执行。</p>
+          <p class="doc-note">OCR 支持图片、PDF、DOCX、PPTX 和 Markdown；输入 20MB，最多 100 张图片或 100 页 PDF。</p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-languages">
@@ -137,8 +140,36 @@
           <div class="cmd-block"><code id="example-languages">transx languages --json</code><button type="button" class="copy-btn" data-copy="example-languages" aria-label="复制 languages 示例">复制</button></div>
         </article>
 
-        <article class="doc-section command-doc" id="cmd-history">
+        <article class="doc-section command-doc" id="cmd-ocr">
           <div class="doc-index">06</div>
+          <span class="kicker">COMMAND GROUP</span>
+          <h2><code>transx ocr</code></h2>
+          <p class="doc-lead">本地识别图片文字，生成可查看的中间文件，确认后再翻译。</p>
+          <div class="cmd-block command-syntax"><code id="code-ocr">transx ocr [enable|status|recognize|remove|help]</code><button type="button" class="copy-btn" data-copy="code-ocr" aria-label="复制 ocr 命令">复制</button></div>
+
+          <h3 class="sub-h"><code>transx ocr enable [--yes]</code></h3>
+          <p class="doc-note">需要 Python 3.10+，下载约 180 MB。模型为 PP-OCRv6 Quality（RapidOCR + OpenVINO），支持中英日等 50 种语言。</p>
+          <div class="opt-table compact-table">
+            <div class="opt-row opt-head"><span>参数</span><span>作用</span></div>
+            <div class="opt-row"><code>--yes</code><span>跳过确认提示</span></div>
+          </div>
+          <div class="cmd-block"><code id="example-ocr-enable">transx ocr enable</code><button type="button" class="copy-btn" data-copy="example-ocr-enable" aria-label="复制 ocr enable 示例">复制</button></div>
+
+          <h3 class="sub-h"><code>transx ocr status [--json]</code></h3>
+          <p class="doc-note">查看 OCR 扩展安装状态、模型、引擎、平台和验证结果。</p>
+          <div class="cmd-block"><code id="example-ocr-status">transx ocr status --json</code><button type="button" class="copy-btn" data-copy="example-ocr-status" aria-label="复制 ocr status 示例">复制</button></div>
+
+          <h3 class="sub-h"><code>transx ocr recognize &lt;path&gt; [--json]</code></h3>
+          <p class="doc-note">识别图片、PDF 页面、DOCX/PPTX 内嵌图片或 Markdown 本地图片，不翻译。生成 <code>&lt;源文件名&gt;_OCR.md</code>；JSON 返回 <code>recognition_file</code> 和预览。</p>
+          <div class="cmd-block"><code id="example-ocr-recognize">transx ocr recognize ./image.png --json</code><button type="button" class="copy-btn" data-copy="example-ocr-recognize" aria-label="复制 ocr recognize 示例">复制</button></div>
+          <p class="doc-note"><code>transx translate --image</code> 先保存并预览识别结果。仅输入 y/Y 后按文件流程并发翻译；n/N 或 Esc 不发送。</p>
+
+          <h3 class="sub-h"><code>transx ocr remove [--yes]</code></h3>
+          <p class="doc-note">删除 OCR 扩展，释放磁盘空间。扩展安装在 <code>~/.transx/features/ocr/</code>，与 CLI 主依赖隔离。</p>
+        </article>
+
+        <article class="doc-section command-doc" id="cmd-history">
+          <div class="doc-index">07</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx history</code></h2>
           <p class="doc-lead">查看、搜索或清理本地翻译历史。文件记录只保存源文件和译文文件信息。</p>
@@ -188,7 +219,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-config">
-          <div class="doc-index">07</div>
+          <div class="doc-index">08</div>
           <span class="kicker">COMMAND GROUP</span>
           <h2><code>transx config</code></h2>
           <p class="doc-lead">查看 URL 模板和完整 API Key，或维护本地配置。</p>
@@ -215,7 +246,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-install">
-          <div class="doc-index">08</div>
+          <div class="doc-index">09</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx install</code></h2>
           <p class="doc-lead">把当前包安装到用户目录并配置 PATH，支持 Windows、macOS 与 Linux。</p>
@@ -226,12 +257,13 @@
             <div class="opt-row"><code>--force</code><span>覆盖用户目录中已存在的同版本安装</span></div>
           </div>
           <h3 class="sub-h">首次安装</h3>
-          <div class="cmd-block"><code id="example-install">npx @gushengcode/transx-cli@latest install</code><button type="button" class="copy-btn" data-copy="example-install" aria-label="复制首次安装命令">复制</button></div>
-          <p class="doc-note">要求 Node.js &gt; 22。安装完成后重新打开终端。</p>
+          <div class="cmd-block"><code id="example-install">npm i @gushengcode/transx-cli</code><button type="button" class="copy-btn" data-copy="example-install" aria-label="复制首次安装命令">复制</button></div>
+          <p class="doc-note">要求 Node.js 22+。安装完成后重新打开终端。</p>
+          <p class="doc-note">查看当前生效路径：Windows 使用 <code>where transx</code>，macOS/Linux 使用 <code>which transx</code>。</p>
         </article>
 
         <article class="doc-section command-doc" id="cmd-version">
-          <div class="doc-index">09</div>
+          <div class="doc-index">10</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx version</code></h2>
           <p class="doc-lead">显示当前版本；<code>--check</code> 检查最新版。</p>
@@ -244,7 +276,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-update">
-          <div class="doc-index">10</div>
+          <div class="doc-index">11</div>
           <span class="kicker">COMMAND</span>
           <h2><code>transx update</code></h2>
           <p class="doc-lead">更新 TransX CLI。</p>
@@ -253,7 +285,7 @@
         </article>
 
         <article class="doc-section command-doc" id="cmd-output">
-          <div class="doc-index">11</div>
+          <div class="doc-index">12</div>
           <span class="kicker">OUTPUT</span>
           <h2>JSON 与错误码</h2>
           <p class="doc-lead"><code>translate --json</code>：成功写入 stdout，失败写入 stderr。</p>
@@ -294,6 +326,16 @@
             <div class="opt-row"><code>FILE_TOO_LARGE</code><span>文件或文本超限</span><span class="dim">7</span></div>
             <div class="opt-row"><code>FILE_TEXT_EMPTY</code><span>未提取到文本</span><span class="dim">7</span></div>
             <div class="opt-row"><code>HISTORY_ERROR</code><span>历史文件读取、写入或锁定失败</span><span class="dim">7</span></div>
+            <div class="opt-row"><code>OCR_NOT_INSTALLED</code><span>OCR 扩展未安装</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_INSTALL_DECLINED</code><span>用户取消 OCR 安装</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_INSTALL_FAILED</code><span>OCR 扩展安装失败</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_RUNTIME_MISSING</code><span>OCR 运行时缺失或 Python 不可用</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_INITIALIZATION_FAILED</code><span>OCR 引擎初始化或自检失败</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_RECOGNITION_FAILED</code><span>OCR 识别失败</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>OCR_TEXT_EMPTY</code><span>图片未识别到文字</span><span class="dim">6</span></div>
+            <div class="opt-row"><code>IMAGE_READ_ERROR</code><span>图片读取失败</span><span class="dim">2</span></div>
+            <div class="opt-row"><code>IMAGE_FORMAT_UNSUPPORTED</code><span>图片格式不支持</span><span class="dim">2</span></div>
+            <div class="opt-row"><code>IMAGE_TOO_LARGE</code><span>图片大小或像素超限</span><span class="dim">2</span></div>
             <div class="opt-row"><code>INSTALL_ERROR</code><span>安装失败</span><span class="dim">5</span></div>
             <div class="opt-row"><code>UPDATE_ERROR</code><span>更新失败</span><span class="dim">5</span></div>
             <div class="opt-row"><code>CANCELLED</code><span>用户取消</span><span class="dim">130</span></div>
