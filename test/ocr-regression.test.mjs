@@ -53,13 +53,13 @@ async function execFileWithInput(file, args, input, options = {}) {
   });
 }
 
-test("package and lock file report version 1.0.4", async () => {
+test("package and lock file report version 1.0.5", async () => {
   const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
   const packageLock = JSON.parse(await readFile(path.join(root, "package-lock.json"), "utf8"));
 
-  assert.equal(packageJson.version, "1.0.4");
-  assert.equal(packageLock.version, "1.0.4");
-  assert.equal(packageLock.packages[""].version, "1.0.4");
+  assert.equal(packageJson.version, "1.0.5");
+  assert.equal(packageLock.version, "1.0.5");
+  assert.equal(packageLock.packages[""].version, "1.0.5");
 });
 
 test("installation paths and shell profiles are correct on Windows, macOS, and Linux", () => {
@@ -137,7 +137,7 @@ test("interactive menu always offers OCR installation until the feature is ready
 
 test("interactive frame uses the concise CLI label and keeps its border complete", () => {
   const frame = buildInteractiveFrame({
-    version: "1.0.4",
+    version: "1.0.5",
     initialized: true,
     items: getInteractiveMenuItems(true, false),
     selectedIndex: 0,

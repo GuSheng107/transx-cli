@@ -1,6 +1,6 @@
 {
   "name": "@gushengcode/transx-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "TransX CLI — DLX 翻译工具",
   "type": "module",
   "bin": {
